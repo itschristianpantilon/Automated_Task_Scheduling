@@ -1,9 +1,8 @@
-import { View, Text, FlatList, Image, ScrollView } from 'react-native'
+import { View, Text, FlatList, Image, ScrollView, TouchableOpacity } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import React, { useState } from 'react'
 import { images } from '../../constants'
 import { useGlobalContext } from '../../context/GlobalProvider'
-import { TouchableOpacity } from 'react-native'
 import TaskRow from '../../components/TaskRow';
 import PopUpMenu from '../../components/PopUpMenu';
 
