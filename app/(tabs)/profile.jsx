@@ -9,12 +9,12 @@ import { signOut } from '../../lib/appwrite';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const profile = () => {
-  const { user, setUser, setIsLogged } = useGlobalContext();
+  const { user, setUser, setIsLoggedIn } = useGlobalContext();
 
   const logout = async () => {
     await signOut();
     setUser(null);
-    setIsLogged(false);
+    setIsLoggedIn(false);
 
     router.replace("/sign-in");
   };
@@ -55,7 +55,7 @@ const profile = () => {
         <Text className="font-pmedium text-lg">Edit Profile</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity className="w-full h-12 bg-slate-200 flex-row items-center justify-between px-4">
+      <TouchableOpacity className="w-full h-12 bg-slate-200 flex-row items-center justify-between px-4" onPress={logout}>
         <Text className="font-pmedium text-lg">Sign Out</Text>
         <Image
           source={icons.logout}

@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { router } from 'expo-router'
 import { images } from '../constants'
 
-const PopUpMenu = ({title, }) => {
+const PopUpMenu = ({title, icon, otherStyles }) => {
 
     const [visible, setVisible] = useState(false);
     const scale = useRef(new Animated.Value(0)).current;
@@ -32,11 +32,11 @@ const PopUpMenu = ({title, }) => {
 
   return (
     <>
-        <TouchableOpacity onPress={() => resizeBox(1)}>
+        <TouchableOpacity className="relative" onPress={() => resizeBox(1)}>
             {/* <Icon name='plus-circle-outline' size={35} color={"#FFF"} /> */}
             <Image 
-                source={images.threeDot}
-                className='w-8 h-7'
+                source={icon}
+                className={otherStyles}
                 resizeMode='contain'
             />
         </TouchableOpacity>

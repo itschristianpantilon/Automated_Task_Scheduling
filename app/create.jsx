@@ -1,5 +1,5 @@
 import { View, Text, Image } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomButton from '../components/CustomButton';
 import { TouchableOpacity } from 'react-native';
@@ -9,23 +9,38 @@ import { useGlobalContext } from '../context/GlobalProvider';
 import CustomInput from '../components/CustomInput';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { databases, ID } from '../lib/appwrite';
+import { router } from 'expo-router';
 
-const create = () => {
+
+const create = ({ navigation }) => {
     const {user, setUser, setIsLoggedIn} = useGlobalContext();
-    const navigation = useNavigation();
-
-    const [selected, setSelected] = React.useState("");
-  
+    const navigate = useNavigation();
+    const [title, setTitle] = useState('');
+    const [selected, setSelected] = useState("");
+    const [taskType, setTaskType] = useState('Solo Task');
+    
   const data = [
-      {key:'1', value:'Solo Task'},
-      {key:'2', value:'Group Task'},
-  ]
+      {key:'1', value:'Solo Task',},
+      {key:'2', value:'Group Task',},
+  ];
+
+    const handleCreateTask = async () => {
+        const taskId = ID.unique();
+        if (taskType === 'Group Task') {
+        const inviteCode = Math.random().toString(36).substring(7); // Generate invite code
+        await databases.createDocument('tasks', taskId, { title, type: taskType, inviteCode });
+        router.push('/overview', { taskId });
+        } else {
+        await databases.createDocument('tasks', taskId, { title, type: taskType });
+        router.push('/overview', { taskId });
+        }
+    };
 
   return (
     <SafeAreaView>
         <View className="flex-row items-center justify-between border-b border-b-gray-400 p-3">
             <View className="flex-row gap-4 items-center justify-center">
-                <TouchableOpacity className='p-1' onPress={() => { navigation.goBack()}}>
+                <TouchableOpacity className='p-1' onPress={() => { navigate.goBack()}}>
                     <Image 
                         source={icons.close}
                         className="w-7 h-7"
@@ -36,7 +51,7 @@ const create = () => {
             </View>
             <CustomButton 
                 title="Create"
-                handlePress={() => {}}
+                handlePress={handleCreateTask}
                 containerStyles="rounded px-6 min-h-[40px]"
                 textStyles="text-sm text-white"
             />
@@ -45,22 +60,6 @@ const create = () => {
 
         <View className='p-5'>
             <View>
-
-                {/* <View className='flex-row items-center pb-5 border-b border-b-gray-400'>
-                    <View className="mt-1.5 rounded-full border-black border-[2px] w-[50px] h-[50px] items-center justify-center mr-4">
-                        <Image 
-                            source={{ uri: user?.avatar }}
-                            className="w-full h-full rounded-full bg-white"
-                            resizeMode='contain'
-                        />
-                    </View>
-                    <View>
-                        <Text className="text-lg">{user?.username}</Text>
-                        <Text className="text-sm">{user?.email}</Text>
-                    </View>
-                </View> */}
-
-                {/* <Text className="text-sm font-pregular py-3">Ask your leader for the group code, then enter it here.</Text> */}
 
                 <CustomInput 
                     title="Task Name"
@@ -72,6 +71,8 @@ const create = () => {
 
                 <SelectList 
                     setSelected={(val) => setSelected(val)} 
+                    selectedValue={taskType} 
+                    onValueChange={(itemValue) => setTaskType(itemValue)}
                     data={data} 
                     save="value"
                     placeholder='Task Type'
@@ -79,6 +80,11 @@ const create = () => {
                     dropdownStyles={{backgroundColor: "white",}}
                     
                 />
+
+                {/* <Picker selectedValue={taskType} onValueChange={(itemValue) => setTaskType(itemValue)}>
+                    <Picker.Item label="Solo Task" value="solo" />
+                    <Picker.Item label="Group Task" value="group" />
+                </Picker> */}
 
             </View>
 

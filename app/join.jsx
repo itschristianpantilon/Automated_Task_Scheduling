@@ -12,13 +12,13 @@ import CustomInput from '../components/CustomInput';
 
 const join = () => {
     const {user, setUser, setIsLoggedIn} = useGlobalContext();
-    const navigation = useNavigation();
+    const navigate = useNavigation();
 
   return (
     <SafeAreaView>
         <View className="flex-row items-center justify-between border-b border-b-gray-400 p-3">
             <View className="flex-row gap-4 items-center justify-center">
-                <TouchableOpacity className='p-1' onPress={() => { navigation.goBack()}}>
+                <TouchableOpacity className='p-1' onPress={() => { navigate.goBack()}}>
                     <Image 
                         source={icons.close}
                         className="w-7 h-7"

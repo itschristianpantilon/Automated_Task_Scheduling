@@ -11,7 +11,7 @@ export default function App() {
 
     const { isLoading, isLoggedIn } = useGlobalContext();
 
-    if (!isLoading && isLoggedIn) return <Redirect href='/Home' />
+    if (!isLoading && isLoggedIn) return <Redirect href='/profile' />
 
     return (
         <SafeAreaView className="bg-white h-full">

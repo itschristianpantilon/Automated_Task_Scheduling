@@ -1,7 +1,7 @@
 import { View, Text, FlatList, Image, ScrollView, TouchableOpacity } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import React, { useState } from 'react'
-import { images } from '../../constants'
+import { icons, images } from '../../constants'
 import { useGlobalContext } from '../../context/GlobalProvider'
 import TaskRow from '../../components/TaskRow';
 import PopUpMenu from '../../components/PopUpMenu';
@@ -35,7 +35,10 @@ const Home = () => {
                   resizeMode='contain'
                 />
           </View>
-          <PopUpMenu />
+          <PopUpMenu 
+            icon={icons.plus}
+            otherStyles="w-8 h-7"
+          />
         </View>
       </View>
 
@@ -80,7 +83,7 @@ const Home = () => {
         ListHeaderComponent={() => (
           <ScrollView className='w-full px-2 mt-2 relative'>
 
-          <Text className="text-xl font-psemibold py-1">Your Tasks</Text>
+          <Text className="text-base font-psemibold py-1">Your Tasks</Text>
 
             <TaskRow />
 
