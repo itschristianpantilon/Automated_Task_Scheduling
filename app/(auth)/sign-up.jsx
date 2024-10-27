@@ -9,6 +9,7 @@ import { Link, router } from 'expo-router'
 import { createUser } from '../../lib/appwrite'
 import { useGlobalContext } from '../../context/GlobalProvider'
 
+
 const SignUp = () => {
 
   const {setUser, setIsLoggedIn} = useGlobalContext();
@@ -35,7 +36,7 @@ const SignUp = () => {
 
       router.replace("/Home");
     } catch (error) {
-      Alert.alert("Error", error.message);
+      
     } finally {
       setIsSubmitting(false);
     }
@@ -46,13 +47,13 @@ const SignUp = () => {
       <ScrollView>
         <View className='w-full justify-center min-h-[90vh] my-6 px-4'>
 
-        <View className='w-full flex-row items-end gap-2'>
+        <View className='flex-row items-end'>
             <Image 
               source={images.taskManagerLogo}
-              className='w-[60px] h-[60px]'
+              className='w-12 h-12 mr-3'
               resizeMode='contain'
             />
-            <Text className="text-2xl text-semibold mt-10 font-psemibold">Automated Task Manager</Text>
+            <Text className="text-xl text-semibold mt-10 font-psemibold">Automated Task Manager</Text>
           </View>
 
           <Text className='text-2xl text-semibold mt-10 font-psemibold text-secondary'>Sign Up</Text>
@@ -85,6 +86,7 @@ const SignUp = () => {
             handlePress={submit}
             containerStyles="mt-7"
             isLoading={isSubmitting}
+            textStyles="text-white"
           />
 
           <View className='justify-center pt-5 flex-row gap-2'>

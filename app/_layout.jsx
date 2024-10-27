@@ -2,7 +2,11 @@ import { StyleSheet, Text, View } from 'react-native'
 import { Slot, Stack, SplashScreen } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { useEffect } from 'react';
-import GlobalProvider from '../context/GlobalProvider'
+import AppwriteClient from '../context/AppwriteClient';
+import GlobalProvider from '../context/GlobalProvider';
+import { TaskProvider } from '../context/TaskContext';
+
+
 
 SplashScreen.preventAutoHideAsync();
 
@@ -32,14 +36,20 @@ const RootLayout = () => {
 
   return (
     <GlobalProvider>
-      <Stack>
-          <Stack.Screen name='index' options={{ headerShown: false }} />
-          <Stack.Screen name='(auth)' options={{ headerShown: false }} />
-          <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-          <Stack.Screen name='create' options={{ headerShown: false }} />
-          <Stack.Screen name='join' options={{ headerShown: false }} />
-          {/*<Stack.Screen name='/search/[query]' options={{ headerShown: false }} />*/}
-      </Stack>
+      <AppwriteClient>
+        <TaskProvider>
+          <Stack>
+              <Stack.Screen name='index' options={{ headerShown: false }} />
+              <Stack.Screen name='(auth)' options={{ headerShown: false }} />
+              <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+              <Stack.Screen name='(task)' options={{ headerShown: false }} />
+              <Stack.Screen name='create' options={{ headerShown: false }} />
+              <Stack.Screen name='join' options={{ headerShown: false }} />
+              {/*<Stack.Screen name='/search/[query]' options={{ headerShown: false }} />*/}
+          </Stack>
+
+        </TaskProvider>
+      </AppwriteClient>
     </GlobalProvider>
     )
 }

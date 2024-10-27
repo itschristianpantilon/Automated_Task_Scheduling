@@ -11,7 +11,7 @@ const TabIcon = ({ icon, color, name, focused }) => {
         source={icon}
         resizeMode='contain'
         tintColor={color}
-        className="w-7 h-5"
+        className="w-7 h-7"
       />
 
       <Text className={`${focused ? 'font-psemibold' : 'font-pregular'} text-xs`} style={{ color: color }}>
@@ -38,15 +38,15 @@ const TabsLayout = () => {
     }}
     >
       <Tabs.Screen 
-        name='Home'
+        name='overview'
         options={{
-          title: "Home",
+          title: "Overview",
           headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <TabIcon 
-              icon={icons.home}
+              icon={icons.overview}
               color={color}
-              name="Home"
+              name="Overview"
               focused={focused}
             />
           )
@@ -55,15 +55,15 @@ const TabsLayout = () => {
 
         
       <Tabs.Screen 
-        name='profile'
+        name='members'
         options={{
-          title: "Profile",
+          title: "members",
           headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <TabIcon 
-              icon={icons.profile}
+              icon={icons.members}
               color={color}
-              name="Profile"
+              name="Members"
               focused={focused}
             />
           )

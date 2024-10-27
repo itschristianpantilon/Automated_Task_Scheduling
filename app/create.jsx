@@ -1,4 +1,4 @@
-import { View, Text, Image } from 'react-native'
+import { View, Text, Image, TextInput, Alert } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomButton from '../components/CustomButton';
@@ -7,40 +7,45 @@ import { icons } from '../constants';
 import { useNavigation } from '@react-navigation/native';
 import { useGlobalContext } from '../context/GlobalProvider';
 import CustomInput from '../components/CustomInput';
-import { SelectList } from 'react-native-dropdown-select-list';
-import { databases, ID } from '../lib/appwrite';
-import { router } from 'expo-router';
+import { createTask, databases, ID } from '../lib/appwrite';
+import { Picker } from '@react-native-picker/picker';
 
 
-const create = ({ navigation }) => {
+const create = () => {
     const {user, setUser, setIsLoggedIn} = useGlobalContext();
-    const navigate = useNavigation();
+    const navigation = useNavigation();
     const [title, setTitle] = useState('');
-    const [selected, setSelected] = useState("");
-    const [taskType, setTaskType] = useState('Solo Task');
+    const [groupCode, setGroupCode] = useState(null);
+    const [taskType, setTaskType] = useState('');
     
-  const data = [
-      {key:'1', value:'Solo Task',},
-      {key:'2', value:'Group Task',},
-  ];
-
     const handleCreateTask = async () => {
-        const taskId = ID.unique();
-        if (taskType === 'Group Task') {
-        const inviteCode = Math.random().toString(36).substring(7); // Generate invite code
-        await databases.createDocument('tasks', taskId, { title, type: taskType, inviteCode });
-        router.push('/overview', { taskId });
-        } else {
-        await databases.createDocument('tasks', taskId, { title, type: taskType });
-        router.push('/overview', { taskId });
+        try {
+          const newTask = await createTask(title, taskType); // Call the createTask function
+          if (taskType === 'group') {
+            setGroupCode(newTask.groupId); // Save the generated group code
+            navigation.push('(task)', { groupId: newTask.groupId, title });
+            // navigation.navigate('overview', {
+            //     groupId:{
+            //         title: title,       // Pass the title of the task
+            //         type: taskType,     // Pass the type of the task (solo or group)
+            //         groupId: newTask.groupId    // Pass the groupId (null for solo tasks)
+            //     }
+            //   });
+          }
+          else if (taskType === 'solo') {
+            setGroupCode(null); // No groupId for solo tasks, but you can reset or handle accordingly
+            navigation.push('(task)', { groupId: null, title }); // Navigate to overview without a groupId
+          }
+        } catch (error) {
+          console.error('Failed to create task:', error);
         }
-    };
-
+      };
+    
   return (
-    <SafeAreaView>
+    <SafeAreaView className='bg-white h-full'>
         <View className="flex-row items-center justify-between border-b border-b-gray-400 p-3">
             <View className="flex-row gap-4 items-center justify-center">
-                <TouchableOpacity className='p-1' onPress={() => { navigate.goBack()}}>
+                <TouchableOpacity className='p-1' onPress={() => { navigation.goBack()}}>
                     <Image 
                         source={icons.close}
                         className="w-7 h-7"
@@ -63,31 +68,31 @@ const create = ({ navigation }) => {
 
                 <CustomInput 
                     title="Task Name"
-                    value={() => {}}
+                    value={title}
                     placeholder=""
-                    handleChangeText={() => {}}
+                    handleChangeText={setTitle}
                     otherStyles=""
                 />
 
-                <SelectList 
-                    setSelected={(val) => setSelected(val)} 
-                    selectedValue={taskType} 
-                    onValueChange={(itemValue) => setTaskType(itemValue)}
-                    data={data} 
-                    save="value"
-                    placeholder='Task Type'
-                    boxStyles={{paddingHorizontal: 10, backgroundColor: "white", borderRadius: 5, marginVertical: 20}}
-                    dropdownStyles={{backgroundColor: "white",}}
-                    
-                />
+            <Text className="text-base text-gray-500 font-pmedium mt-2">Select Task Type</Text>
 
-                {/* <Picker selectedValue={taskType} onValueChange={(itemValue) => setTaskType(itemValue)}>
-                    <Picker.Item label="Solo Task" value="solo" />
-                    <Picker.Item label="Group Task" value="group" />
-                </Picker> */}
-
+                    <View className="bg-zinc-50 border border-gray-300 rounded-md">
+                        <Picker
+                            selectedValue={taskType}
+                            style={{ borderBlockColor: 'black'}}
+                            onValueChange={(itemValue) => setTaskType(itemValue)}
+                        >
+                            <Picker.Item label="Solo" value="solo" />
+                            <Picker.Item label="Group" value="group" />
+                        </Picker>
+                    </View>
             </View>
 
+            {taskType === 'group' && groupCode && (
+                <View>
+                    <Text>Group Code: {groupCode}</Text>
+                </View>
+            )}
 
         </View>
     </SafeAreaView>
@@ -95,3 +100,4 @@ const create = ({ navigation }) => {
 }
 
 export default create
+
