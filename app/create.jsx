@@ -17,7 +17,7 @@ const create = () => {
     const navigation = useNavigation();
     const [title, setTitle] = useState('');
     const [groupCode, setGroupCode] = useState(null);
-    const [taskType, setTaskType] = useState('');
+    const [taskType, setTaskType] = useState('solo');
     const { setTaskId } = useTask();
     const [tasks, setTasks] = useState([]);
     

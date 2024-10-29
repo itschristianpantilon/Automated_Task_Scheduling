@@ -7,12 +7,24 @@ import { icons } from '../constants';
 import { useNavigation } from '@react-navigation/native';
 import { useGlobalContext } from '../context/GlobalProvider';
 import CustomInput from '../components/CustomInput';
+import { getCurrentUser } from '../lib/appwrite';
 
 
 
 const join = () => {
     const {user, setUser, setIsLoggedIn} = useGlobalContext();
     const navigation = useNavigation();
+
+    const handleJoinGroup = async () => {
+        try {
+            const currentUser = await getCurrentUser();
+            await joinGroup(groupCode, currentUser.$id); // Use entered group code to join
+            Alert.alert("Join Request Sent", "Waiting for approval from the task creator.");
+        } catch (error) {
+            console.error("Failed to join group:", error);
+        }
+    };
+    
 
   return (
     <SafeAreaView className='bg-white h-full'>

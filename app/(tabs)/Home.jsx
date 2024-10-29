@@ -42,7 +42,9 @@ const Home = () => {
     };
 
 
+    if (user && user.$id) {
       fetchTasks(user.$id);
+    }
   }, [user]);
 
   
@@ -83,23 +85,33 @@ const Home = () => {
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => (
           <View className='px-2'>
+
             <ScrollView>
+
+
               <TaskRow 
-                title={item.title}
-                taskType={item.type}
+                title={item?.title}
+                taskType={item?.type}
                 onPress={() => {
-                  setTaskId(item.$id);
+                  setTaskId(item?.$id);
                   navigation.navigate('(task)')}
                 }
               />
             </ScrollView>
           </View>
         )}
-        ListHeaderComponent={(item) => (
-          <View className={`p-2 ${ item ? '' : 'hidden'}`}>
-            <Text className='text-base font-pmedium'>Your Task</Text>
+        ListHeaderComponent={() => (
+          <View className={`p-2`}>
+  
+           <Text>{tasks.length > 0 ? 'Your Task' : 'Create Task'}</Text>
+           
           </View>
           
+        )}
+        ListEmptyComponent={() => (
+          <View>
+            
+          </View>
         )}
         ListFooterComponent={() => (
               <Image 
