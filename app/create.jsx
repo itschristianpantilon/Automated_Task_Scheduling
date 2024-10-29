@@ -9,6 +9,7 @@ import { useGlobalContext } from '../context/GlobalProvider';
 import CustomInput from '../components/CustomInput';
 import { createTask, databases, ID } from '../lib/appwrite';
 import { Picker } from '@react-native-picker/picker';
+import { useTask } from '../context/TaskContext';
 
 
 const create = () => {
@@ -17,13 +18,19 @@ const create = () => {
     const [title, setTitle] = useState('');
     const [groupCode, setGroupCode] = useState(null);
     const [taskType, setTaskType] = useState('');
+    const { setTaskId } = useTask();
+    const [tasks, setTasks] = useState([]);
     
     const handleCreateTask = async () => {
         try {
           const newTask = await createTask(title, taskType); // Call the createTask function
           if (taskType === 'group') {
             setGroupCode(newTask.groupId); // Save the generated group code
-            navigation.push('(task)', { groupId: newTask.groupId, title });
+            navigation.push('(task)', {
+                title: title,
+                taskType: taskType,
+                groupId: newTask.groupId 
+            });
             // navigation.navigate('overview', {
             //     groupId:{
             //         title: title,       // Pass the title of the task
@@ -88,11 +95,11 @@ const create = () => {
                     </View>
             </View>
 
-            {taskType === 'group' && groupCode && (
+            {/* {taskType === 'group' && groupCode && (
                 <View>
                     <Text>Group Code: {groupCode}</Text>
                 </View>
-            )}
+            )} */}
 
         </View>
     </SafeAreaView>

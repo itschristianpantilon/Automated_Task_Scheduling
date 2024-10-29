@@ -8,20 +8,19 @@ import { router, useNavigation } from 'expo-router'
 import { useAppwrite } from '../../context/AppwriteClient'
 import { useTask } from '../../context/TaskContext'
 import TabsLayout from './_layout'
+import { useRoute } from '@react-navigation/native'
 
 const overview = () => {
   const navigation = useNavigation();
-
+  const route = useRoute();
+  const { title, taskType, groupId } = route.params || {};
   const { taskId } = useTask(); // Get taskId from context
   const [task, setTask] = useState(null);
   const { database } = useAppwrite();
 
   useEffect(() => {
     const fetchTask = async () => {
-      if (!taskId) {
-        console.error('Error: Missing taskId');
-        return;
-      }
+      if (!taskId) return;
 
       try {
         const response = await database.getDocument('670e0a0e002e9b302a34', '6711f75c00201eca940c', taskId);
@@ -33,8 +32,6 @@ const overview = () => {
     
     fetchTask();
   }, [taskId]);
-  
-  if (!task) return <Text>Loading...</Text>;
   
   return (
     <SafeAreaView className='bg-white flex-col h-full'>
@@ -48,11 +45,11 @@ const overview = () => {
                 </TouchableOpacity>
       </View>
       <View className="p-4 flex-col">
-        <Text className="text-lg font-plight capitalize">{task?.type} Task</Text>
-        <Text className="text-3xl font-psemibold text-secondary-100 mb-2">{task.title}</Text>
+        <Text className="text-lg font-plight capitalize">{task?.type || taskType} Task</Text>
+        <Text className="text-3xl font-psemibold text-secondary-100 mb-2">{task?.title || title}</Text>
         <Text className='text-xs font-pregular mb-1'>Group Code:</Text>
-          <View className="flex-row items-center justify-between border p-2 border-gray-300 rounded-lg">
-            <Text className='text-base'>{task?.groupId}</Text>
+          <View className={`${task?.type === 'solo' ? 'hidden' : ''} flex-row items-center justify-between border p-2 border-gray-300 rounded-lg`}>
+            <Text className='text-base'>{task?.$id}</Text>
             <TouchableOpacity>
               <Image 
                 source={icons.copy}

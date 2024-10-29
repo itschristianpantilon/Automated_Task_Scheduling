@@ -8,6 +8,7 @@ import PopUpMenu from '../../components/PopUpMenu';
 import { router, useNavigation } from 'expo-router'
 import { useAppwrite } from '../../context/AppwriteClient'
 import { useTask } from '../../context/TaskContext'
+import { Query } from 'react-native-appwrite'
 
 
 
@@ -24,15 +25,25 @@ const Home = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await database.listDocuments('670e0a0e002e9b302a34', '6711f75c00201eca940c');
+        const response = await database.listDocuments(
+          '670e0a0e002e9b302a34',
+          '6711f75c00201eca940c',
+          [Query.equal('userId', user.$id)]
+          
+        );
         setTasks(response.documents);
+        // const response = await database.listDocuments('670e0a0e002e9b302a34', '6711f75c00201eca940c');
+        // // Filter tasks by `userId` on the client side
+        // const userTasks = response.documents.filter(task => task.userId === user.$id);
+        // setTasks(userTasks);
       } catch (error) {
         console.error('Error fetching tasks:', error);
       }
     };
 
-    fetchTasks();
-  }, []);
+
+      fetchTasks(user.$id);
+  }, [user]);
 
   
   return (
@@ -84,9 +95,9 @@ const Home = () => {
             </ScrollView>
           </View>
         )}
-        ListHeaderComponent={() => (
-          <View className='p-2'>
-            <Text className='text-base font-pmedium'>Your Tasks</Text>
+        ListHeaderComponent={(item) => (
+          <View className={`p-2 ${ item ? '' : 'hidden'}`}>
+            <Text className='text-base font-pmedium'>Your Task</Text>
           </View>
           
         )}
