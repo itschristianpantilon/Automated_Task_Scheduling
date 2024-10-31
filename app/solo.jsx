@@ -1,19 +1,16 @@
-import { View, Text, Image, Alert, ToastAndroid, Platform } from 'react-native'
+import { View, Text, Image } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { createTask } from '../../lib/appwrite'
 import { TouchableOpacity } from 'react-native'
-import { icons, images } from '../../constants'
+import { icons, images } from '../constants'
 import { router, useNavigation } from 'expo-router'
-import { useAppwrite } from '../../context/AppwriteClient'
-import { useTask } from '../../context/TaskContext'
-import TabsLayout from './_layout'
+import { useAppwrite } from '../context/AppwriteClient'
+import { useTask } from '../context/TaskContext'
 import { useRoute } from '@react-navigation/native'
-import PopUpMenu from '../../components/PopUpMenu'
+import PopUpMenu from '../components/PopUpMenu'
 import * as Progress from 'react-native-progress';
-import * as Clipboard from 'expo-clipboard';
 
-const overview = () => {
+const solo = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { title, taskType, groupId } = route.params || {};
@@ -35,18 +32,6 @@ const overview = () => {
     
     fetchTask();
   }, [taskId]);
-
-  const copyToClipboard = () => {
-    if (task?.$id) {
-      Clipboard.setString(task.$id); // Copy the task ID to the clipboard
-      if (Platform.OS === 'android') {
-        ToastAndroid.show('Copied to Clipboard', ToastAndroid.SHORT);
-      } else {
-        // Implement a custom Toast for iOS or use a library
-        console.log('Copied to Clipboard');
-      }
-    }
-  };
   
   return (
     <SafeAreaView className='bg-white flex-col h-full'>
@@ -63,19 +48,7 @@ const overview = () => {
       <View className="p-4 flex-col">
         <Text className="text-lg font-plight capitalize">{task?.type || taskType} Task</Text>
         <Text className="text-3xl font-psemibold text-secondary-100 mb-2">{task?.title || title}</Text>
-        <Text className='text-xs font-pregular mb-1'>Group Code:</Text>
-          <View className={`${task?.type === 'solo' ? 'hidden' : ''} flex-row items-center justify-between border p-2 border-gray-300 rounded-lg`}>
-            <Text className='text-base'>{task?.$id}</Text>
-            <TouchableOpacity onPress={copyToClipboard}>
-              <Image 
-                source={icons.copy}
-                className="w-7 h-7"
-                resizeMode='contain'
-
-              />
-            </TouchableOpacity>
-          </View>
-
+        
           <View className='flex-row mt-3'>
               <View className="border rounded-full border-secondary-100 mr-4">
                 <Image 
@@ -106,4 +79,4 @@ const overview = () => {
   )
 }
 
-export default overview
+export default solo

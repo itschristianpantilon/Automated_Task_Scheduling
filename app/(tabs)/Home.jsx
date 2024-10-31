@@ -93,8 +93,14 @@ const Home = () => {
                 title={item?.title}
                 taskType={item?.type}
                 onPress={() => {
-                  setTaskId(item?.$id);
-                  navigation.navigate('(task)')}
+                  if(item?.type === 'group'){
+                    setTaskId(item?.$id);
+                    navigation.navigate('(task)')
+                  } else {
+                    setTaskId(item?.$id);
+                    navigation.navigate('solo')
+                  }
+                }
                 }
               />
             </ScrollView>

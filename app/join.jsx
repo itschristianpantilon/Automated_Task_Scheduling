@@ -1,5 +1,5 @@
-import { View, Text, Image } from 'react-native'
-import React from 'react'
+import { View, Text, Image, Alert } from 'react-native'
+import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomButton from '../components/CustomButton';
 import { TouchableOpacity } from 'react-native';
@@ -7,21 +7,22 @@ import { icons } from '../constants';
 import { useNavigation } from '@react-navigation/native';
 import { useGlobalContext } from '../context/GlobalProvider';
 import CustomInput from '../components/CustomInput';
-import { getCurrentUser } from '../lib/appwrite';
+import { getCurrentUser, requestJoinTask } from '../lib/appwrite';
 
 
 
 const join = () => {
     const {user, setUser, setIsLoggedIn} = useGlobalContext();
     const navigation = useNavigation();
+    const [groupCode, setGroupCode] = useState('');
 
-    const handleJoinGroup = async () => {
+    const handleJoinRequest = async () => {
         try {
-            const currentUser = await getCurrentUser();
-            await joinGroup(groupCode, currentUser.$id); // Use entered group code to join
-            Alert.alert("Join Request Sent", "Waiting for approval from the task creator.");
+            await requestJoinTask(groupCode);
+            Alert.alert('Request Sent', 'Please wait for the task creator to accept your request.');
+            navigation.goBack();
         } catch (error) {
-            console.error("Failed to join group:", error);
+            Alert.alert('Error', 'Failed to send join request.');
         }
     };
     
@@ -41,7 +42,7 @@ const join = () => {
             </View>
             <CustomButton 
                 title="Join"
-                handlePress={() => {}}
+                handlePress={handleJoinRequest}
                 containerStyles="rounded px-7 min-h-[40px]"
                 textStyles="text-sm text-white"
             />
@@ -68,9 +69,9 @@ const join = () => {
                 <Text className="text-sm font-pregular py-3">Ask your leader for the group code, then enter it here.</Text>
 
                 <CustomInput 
-                    value={() => {}}
+                    value={groupCode}
                     placeholder="Group Code"
-                    handleChangeText={() => {}}
+                    handleChangeText={setGroupCode}
                     otherStyles="pb-2"
                 />
 

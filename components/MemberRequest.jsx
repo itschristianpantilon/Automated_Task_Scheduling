@@ -9,7 +9,7 @@ const Button = ({ title, textStyles, otherStyle, onPress}) => (
     </TouchableOpacity>
 )
 
-const MemberRequest = () => {
+const MemberRequest = ({ request, onAccept }) => {
 
     const {user, setUser, setIsLoggedIn} = useGlobalContext();
 
@@ -23,13 +23,14 @@ const MemberRequest = () => {
                         resizeMode='contain'
                     />
                 </View>
-                <Text className="text-base font-pregular ml-3">{user?.username}</Text>
+                <Text className="text-base font-pregular ml-3 text-black-100">{request.requeterId}</Text>
             </View>
 
             <View className="flex-row items-center justify-center">
                 <Button 
                     title="Accept"
                     otherStyle="mr-1"
+                    onPress={() => onAccept(request.$id, request.requesterId)}
                 />
 
                 <Button 

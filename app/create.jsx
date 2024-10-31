@@ -41,7 +41,7 @@ const create = () => {
           }
           else if (taskType === 'solo') {
             setGroupCode(null); // No groupId for solo tasks, but you can reset or handle accordingly
-            navigation.push('(task)', { groupId: null, title }); // Navigate to overview without a groupId
+            navigation.push('solo', { groupId: null, title }); // Navigate to overview without a groupId
           }
         } catch (error) {
           console.error('Failed to create task:', error);
