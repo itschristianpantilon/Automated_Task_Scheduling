@@ -48,6 +48,8 @@ const Home = () => {
   }, [user]);
 
   
+
+  
   return (
     <SafeAreaView className="w-full h-full bg-white">
 
@@ -78,7 +80,9 @@ const Home = () => {
         </View>
       </View>
       
+<View>
 
+</View>
 
       <FlatList 
         data={tasks}
@@ -110,7 +114,6 @@ const Home = () => {
           <View className={`p-2`}>
   
            <Text>{tasks.length > 0 ? 'Your Task' : 'Create Task'}</Text>
-           
           </View>
           
         )}

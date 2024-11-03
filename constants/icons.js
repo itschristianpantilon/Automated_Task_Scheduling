@@ -13,6 +13,9 @@ import overview from '../assets/icons/overview.png';
 import members from '../assets/icons/members.png';
 import copy from '../assets/icons/copy.png';
 import back from '../assets/icons/back.png';
+import remove from '../assets/icons/remove.png';
+import upload from '../assets/icons/upload.png';
+import threeDotEllipse from '../assets/icons/threeDotEllipse.png';
 
 export default {
   home,
@@ -28,5 +31,8 @@ export default {
   overview,
   members,
   copy,
-  back
+  back,
+  remove,
+  upload,
+  threeDotEllipse
 };

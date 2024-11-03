@@ -1,26 +1,35 @@
 import { View, Text, Image } from 'react-native'
 import React from 'react'
 import { useGlobalContext } from '../context/GlobalProvider';
-import { images } from '../constants';
-import PopUpMenu from './PopUpMenu';
+import { icons, images } from '../constants';
+import { TouchableOpacity } from 'react-native';
 
-const MemberContainer = () => {
+
+const MemberContainer = ({ username, userAvatar }) => {
 
     const {user, setUser, setIsLoggedIn} = useGlobalContext();
 
   return (
-    <View className="flex-row py-2 items-center justify-between">
+    <View className="relative flex-row py-2 items-center justify-between border-b border-b-gray-100/40">
         <View className="flex-row items-center">
             <View className="w-9 h-9 border-spacing-8 rounded-full">
                 <Image 
-                    source={{ uri: user?.avatar }}
+                    source={{ uri: userAvatar }}
                     className="w-full h-full rounded-full"
                     resizeMode='contain'
                 />
             </View>
-            <Text className="text-base font-pregular ml-3">{user?.username}</Text>
+            <Text className="text-base font-pregular ml-3">{username}</Text>
         </View>
-        <PopUpMenu icon={images.threeDot} otherStyles="w-5 h-5" />
+        
+        <TouchableOpacity>
+            <Image 
+                source={icons.remove}
+                className='w-6 h-6 mr-2'
+                resizeMode='contain'
+            />
+        </TouchableOpacity>
+
     </View>
   )
 }

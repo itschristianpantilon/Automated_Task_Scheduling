@@ -18,12 +18,12 @@ const MemberRequest = ({ request, onAccept }) => {
             <View className="flex-row items-center flex-1">
                 <View className="w-9 h-9 border-spacing-8 rounded-full">
                     <Image 
-                        source={{ uri: user?.avatar }}
+                        source={{ uri: request.avatar }}
                         className="w-full h-full rounded-full"
                         resizeMode='contain'
                     />
                 </View>
-                <Text className="text-base font-pregular ml-3 text-black-100">{request.requeterId}</Text>
+                <Text className="text-base font-pregular ml-3 text-black-100">{request.username}</Text>
             </View>
 
             <View className="flex-row items-center justify-center">

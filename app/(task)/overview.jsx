@@ -1,4 +1,4 @@
-import { View, Text, Image, Alert, ToastAndroid, Platform } from 'react-native'
+import { View, Text, Image, Alert, ToastAndroid, Platform, FlatList, ScrollView } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { createTask } from '../../lib/appwrite'
@@ -7,11 +7,12 @@ import { icons, images } from '../../constants'
 import { router, useNavigation } from 'expo-router'
 import { useAppwrite } from '../../context/AppwriteClient'
 import { useTask } from '../../context/TaskContext'
-import TabsLayout from './_layout'
 import { useRoute } from '@react-navigation/native'
 import PopUpMenu from '../../components/PopUpMenu'
 import * as Progress from 'react-native-progress';
 import * as Clipboard from 'expo-clipboard';
+import CustomButton from '../../components/CustomButton'
+import OverviewCard from '../../components/OverviewCard'
 
 const overview = () => {
   const navigation = useNavigation();
@@ -49,7 +50,7 @@ const overview = () => {
   };
   
   return (
-    <SafeAreaView className='bg-white flex-col h-full'>
+    <SafeAreaView className='bg-white flex-col h-full relative'>
       <View className="pl-4 flex-row items-center justify-between">
                 <TouchableOpacity className='' onPress={() => { router.replace('/Home')}}>
                     <Image 
@@ -101,6 +102,66 @@ const overview = () => {
           <View className='mt-4 border-b border-b-gray-300'>
             <Text className='text-lg font-psemibold'>Overview</Text>
           </View>
+      </View>
+
+      <View className={`p-2 `}>
+        <ScrollView className='h-[50vh] overflow-scroll'>
+          <OverviewCard />
+          <OverviewCard />
+          <OverviewCard />
+          <OverviewCard />
+          <OverviewCard />
+          <OverviewCard />
+          <OverviewCard />
+          <OverviewCard />
+        </ScrollView>
+      </View>
+
+      <View className=''>
+        <FlatList 
+          data={() => {}}
+          keyExtractor={(item) => item.$id}
+          renderItem={({ item }) => (
+            <View className='px-2'>
+              
+            </View>
+          )}
+          // ListHeaderComponent={() => (
+          //   <View className={`p-2`}>
+          //     <ScrollView>
+          //     <OverviewCard />
+          //     <OverviewCard />
+          //     <OverviewCard />
+          //     <OverviewCard />
+          //     <OverviewCard />
+          //     <OverviewCard />
+
+          //     </ScrollView>
+          //   </View>
+            
+          // )}
+          ListEmptyComponent={() => (
+            <View>
+              <Text></Text>
+            </View>
+          )}
+          ListFooterComponent={() => (
+            <View className=''>
+            </View>
+          )}
+        />
+      </View>
+
+      <View className={`absolute bottom-0 w-full p-4 bg-white`}>
+
+          <CustomButton 
+            title="Assign Task"
+            textStyles="text-base text-white font-psemibold"
+            containerStyles="min-h-[45px] rounded-md"
+            handlePress={() => {}}
+            icon={() => {}}
+            iconStyle=""
+        />
       </View>
     </SafeAreaView>
   )

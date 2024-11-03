@@ -1,70 +1,22 @@
-import { View, Text, ScrollView, Alert } from 'react-native'
+import { View, Text, ScrollView, Alert, Image } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import MemberContainer from '../../components/MemberContainer'
 import MemberRequest from '../../components/MemberRequest'
 import { acceptJoinRequest, config, databases, getPendingRequests, listPendingRequests } from '../../lib/appwrite'
 import { useTask } from '../../context/TaskContext'
+import { icons, images } from '../../constants'
+import { useNavigation } from 'expo-router'
+import { TouchableOpacity } from 'react-native'
 
 const members = () => {
 
-  // Render list of pending requests
-// const renderPendingRequests = async () => {
-//   const requests = await listPendingRequests(taskId); // Fetch pending requests by taskId
-//   return requests.map(request => (
-//       <MemberRequest 
-//           key={request.$id} 
-//           request={request}
-//           onAccept={() => handleAcceptRequest(request.$id, request.userId)}
-//       />
-//   ));
-// };
 
-// // Handle accepting a join request
-// const handleAcceptRequest = async (requestId, userId) => {
-//   try {
-//       await acceptJoinRequest(requestId, taskId, userId);
-//       Alert.alert("Request Accepted", "Member has been added to the task.");
-//   } catch (error) {
-//       console.error("Failed to accept request:", error);
-//   }
-// };
-
-// const renderAcceptedMembers = async () => {
-//   // Fetch all users with the current task in their 'tasks' list
-//   const members = await databases.listDocuments(
-//       config.databaseId,
-//       config.userCollectionId,
-//       [Query.search('tasks', taskId)]
-//   );
-//   return members.documents.map(member => (
-//       <MemberContainer key={member.$id} member={member} />
-//   ));
-// };
     const { taskId } = useTask();
     const [pendingRequests, setPendingRequests] = useState([]);
     const [members, setMembers] = useState([]);
+    const navigation = useNavigation();
 
-  //   useEffect(() => {
-  //     console.log("Fetching pending requests for taskId:", taskId);
-  //     if (!taskId) {
-  //       console.error("Error: taskId is undefined");
-  //       setPendingRequests([]);
-  //       return;
-  //     }
-  //     const fetchPendingRequests = async () => {
-  //         try {
-  //             const requests = await getPendingRequests(taskId);
-  //             setPendingRequests(Array.isArray(requests) ? requests : []);
-  //         } catch (error) {
-  //             console.error('Failed to fetch pending requests:', error);
-  //             setPendingRequests([]);
-  //         }
-  //     };
-      
-  //     fetchPendingRequests();
-    
-  // }, [taskId]);
 
   useEffect(() => {
     if (!taskId) {
@@ -83,48 +35,52 @@ const members = () => {
         }
     };
 
-    // Fetches members for the task by taskId
-    const fetchMembers = async () => {
-        try {
-            const task = await databases.getDocument(config.databaseId, config.taskCollectionId, taskId);
-            setMembers(task.members || []); // Ensuring members is an array
-        } catch (error) {
-            console.error('Failed to fetch members:', error);
-        }
-    };
+  
+    const fetchMemberDetails = async (memberIds) => {
+      try {
+          const memberDetails = await Promise.all(
+              memberIds.map((id) => databases.getDocument(config.databaseId, config.userCollectionId, id))
+          );
+          setMembers(memberDetails);
+      } catch (error) {
+          console.error('Failed to fetch member details:', error);
+      }
+  };
+
+  // Fetches members for the task by taskId
+  const fetchMembers = async () => {
+      try {
+          const task = await databases.getDocument(config.databaseId, config.taskCollectionId, taskId);
+          const memberIds = task.members || []; // Assuming `task.members` is an array of IDs
+          fetchMemberDetails(memberIds); // Fetch full details of each member
+      } catch (error) {
+          console.error('Failed to fetch members:', error);
+      }
+  };
 
     fetchPendingRequests();
     fetchMembers();
 }, [taskId]);
 
-  // const handleAcceptRequest = async (requestId, requesterId) => {
-  //     try {
-  //         await acceptJoinRequest(requestId, taskId, requesterId);
-  //         Alert.alert('Accepted', 'Member added successfully.');
-  //         setPendingRequests(pendingRequests.filter((req) => req.$id !== requestId));
-  //     } catch (error) {
-  //         console.error('Failed to accept request:', error);
-  //     }
-  // };
-
-  // Accepts a member request and updates lists
-//   const handleAcceptRequest = async (requestId, requesterId) => {
-//     try {
-//         const updatedMembers = await acceptJoinRequest(requestId, taskId, requesterId);
-//         Alert.alert('Accepted', 'Member added successfully.');
-//         setPendingRequests((prev) => prev.filter((req) => req.$id !== requestId));
-//         setMembers(updatedMembers); // Assuming acceptJoinRequest returns the updated members list
-//     } catch (error) {
-//         console.error('Failed to accept request:', error);
-//     }
-// };
-
+  
 const handleAcceptRequest = async (requestId, requesterId) => {
   try {
-      const updatedMembers = await acceptJoinRequest(requestId, taskId, requesterId);
+      // Fetch the join request to get additional user details like username and avatar
+      const joinRequest = await databases.getDocument(config.databaseId, config.joinRequestCollectionId, requestId);
+
+      // Extract username and avatar and validate they exist
+      const { username, avatar } = joinRequest;
+      if (!username || !avatar) {
+          throw new Error('Join request is missing required fields: username or avatar.');
+      }
+
+      // Accept the join request, adding the member to the task
+      const updatedMembers = await acceptJoinRequest(requestId, taskId, requesterId, username, avatar);
+      
+      // Show success alert and update members state to reflect new member
       Alert.alert('Accepted', 'Member added successfully.');
-      setPendingRequests(pendingRequests.filter((req) => req.$id !== requestId));
-      setMembers(updatedMembers); // Update the member list with the new members array
+      setPendingRequests((prevRequests) => prevRequests.filter((req) => req.$id !== requestId));
+      setMembers(updatedMembers); // Ensure `updatedMembers` is the updated array of members
   } catch (error) {
       console.error('Failed to accept request:', error);
       Alert.alert('Error', 'Failed to accept join request.');
@@ -133,34 +89,39 @@ const handleAcceptRequest = async (requestId, requesterId) => {
 
 
 
+
   return (
-    <SafeAreaView className="bg-white p-4">
-      <View>
-        <Text className="text-lg font-medium pb-1 mb-2 border-b border-b-gray-400">Members</Text>
+    <SafeAreaView className="bg-white">
+    <View className="px-4 flex-row items-center ">
+        <TouchableOpacity className='' onPress={() => navigation.goBack()}>
+            <Image 
+                source={icons.back}
+                className="w-7 h-7"
+                resizeMode='contain'
+            />
+        </TouchableOpacity>
+    </View>
+
+      <View className='p-4'>
+        <Text className="text-lg font-medium pb-1 mb-2 border-b border-b-gray-400">Members <Text>(</Text>{members.length}<Text>)</Text></Text>
         <ScrollView className="h-[40vh] overflow-y-hidden overflow-scroll">
-        {/* {members.map((member) => (
-                    <MemberContainer key={member.$id} member={member} />
-                ))} */}
 
                 {members.length > 0 ? (
                     members.map((member, index) => (
-                        <MemberContainer key={`${member.id}-${index}`} member={member} />
+                        <MemberContainer 
+                          key={`${member.id}-${index}`} 
+                          username={member.username}
+                          userAvatar={member.avatar}
+                          />
                     ))
                 ) : (
                     <Text>No members yet.</Text>
                 )}
         </ScrollView>
 
-        <Text className="text-lg font-medium pb-1 mb-2 border-b border-b-gray-400">Member Request (2)</Text>
+        <Text className="text-lg font-medium pb-1 mb-2 border-b border-b-gray-400">Member Request <Text>(</Text>{pendingRequests.length}<Text>)</Text></Text>
         <ScrollView className="h-[40vh] overflow-y-hidden overflow-scroll">
-        {/* {pendingRequests.map((request) => (
-                    <MemberRequest
-                        key={request.$id}
-                        request={request}
-                        onAccept={() => handleAcceptRequest(request.$id, request.requesterId)}
-                    />
-                ))} */}
-
+    
               {pendingRequests.length > 0 ? (
                     pendingRequests.map((request) => (
                         <MemberRequest
@@ -172,6 +133,7 @@ const handleAcceptRequest = async (requestId, requesterId) => {
                 ) : (
                     <Text>No pending requests.</Text>
                 )}
+                
         </ScrollView>
       </View>
     </SafeAreaView>

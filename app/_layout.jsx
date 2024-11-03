@@ -7,7 +7,6 @@ import GlobalProvider from '../context/GlobalProvider';
 import { TaskProvider } from '../context/TaskContext';
 
 
-
 SplashScreen.preventAutoHideAsync();
 
 const RootLayout = () => {
@@ -38,16 +37,17 @@ const RootLayout = () => {
     <GlobalProvider>
       <AppwriteClient>
         <TaskProvider>
-          <Stack>
-              <Stack.Screen name='index' options={{ headerShown: false }} />
-              <Stack.Screen name='(auth)' options={{ headerShown: false }} />
-              <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-              <Stack.Screen name='(task)' options={{ headerShown: false }} />
-              <Stack.Screen name='create' options={{ headerShown: false }} />
-              <Stack.Screen name='join' options={{ headerShown: false }} />
-              <Stack.Screen name='solo' options={{ headerShown: false }} />
-              {/*<Stack.Screen name='/search/[query]' options={{ headerShown: false }} />*/}
-          </Stack>
+
+            <Stack>
+                <Stack.Screen name='index' options={{ headerShown: false }} />
+                <Stack.Screen name='(auth)' options={{ headerShown: false }} />
+                <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+                <Stack.Screen name='(task)' options={{ headerShown: false }} />
+                <Stack.Screen name='create' options={{ headerShown: false }} />
+                <Stack.Screen name='join' options={{ headerShown: false }} />
+                <Stack.Screen name='solo' options={{ headerShown: false }} />
+                {/*<Stack.Screen name='/search/[query]' options={{ headerShown: false }} />*/}
+            </Stack>
 
         </TaskProvider>
       </AppwriteClient>

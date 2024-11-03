@@ -59,7 +59,7 @@ const create = () => {
                         resizeMode='contain'
                     />
                 </TouchableOpacity>
-                <Text className="font-pmedium text-lg">Create Group</Text>
+                <Text className="font-pmedium text-lg">Create Task</Text>
             </View>
             <CustomButton 
                 title="Create"
