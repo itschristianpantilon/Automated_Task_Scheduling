@@ -1,4 +1,4 @@
-import { View, Text, Image } from 'react-native'
+import { View, Text, Image, Modal, ScrollView } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { TouchableOpacity } from 'react-native'
@@ -9,6 +9,9 @@ import { useTask } from '../context/TaskContext'
 import { useRoute } from '@react-navigation/native'
 import PopUpMenu from '../components/PopUpMenu'
 import * as Progress from 'react-native-progress';
+import CustomButton from '../components/CustomButton'
+import CustomInput from '../components/CustomInput'
+import SoloOverviewCard from '../components/SoloOverviewCard'
 
 const solo = () => {
   const navigation = useNavigation();
@@ -17,6 +20,7 @@ const solo = () => {
   const { taskId } = useTask(); // Get taskId from context
   const [task, setTask] = useState(null);
   const { database } = useAppwrite();
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchTask = async () => {
@@ -34,7 +38,7 @@ const solo = () => {
   }, [taskId]);
   
   return (
-    <SafeAreaView className='bg-white flex-col h-full'>
+    <SafeAreaView className='bg-white flex-col h-full relative'>
       <View className="pl-4 flex-row items-center justify-between">
                 <TouchableOpacity className='' onPress={() => { router.replace('/Home')}}>
                     <Image 
@@ -74,6 +78,83 @@ const solo = () => {
           <View className='mt-4 border-b border-b-gray-300'>
             <Text className='text-lg font-psemibold'>Overview</Text>
           </View>
+
+          <View>
+            <ScrollView className='my-4'>
+              <SoloOverviewCard />
+            </ScrollView>
+          </View>
+
+          <View>
+            {isModalVisible && (
+          <Modal
+            transparent={true}
+            animationType="fade"
+            visible={isModalVisible}
+            onRequestClose={() => setIsModalVisible(false)}
+          >
+            <View className='flex-1 justify-center items-center bg-black/50'>
+              
+
+            <View className="min-w-[90%] p-5 bg-white rounded-lg min-h-[50vh] relative">
+                  
+                  <View className='flex-row items-center justify-between'>
+                    <Text className='font-psemibold text-lg'>Add Tasks</Text>
+
+                    <TouchableOpacity onPress={() => setIsModalVisible(false)}>
+                      <Image 
+                        source={icons.close}
+                        className='w-5 h-5'
+                        resizeMode='contain'
+                      />
+                    </TouchableOpacity>
+                  </View>
+
+                  <View className='py-2'>
+                    
+                    <CustomInput 
+                      title='Name of the Task'
+                      value={() => {}}
+                      placeholder=''
+                      handleChangeText={() => {}}
+                      otherStyles='mt-4'
+                      textStyle='text-xs'
+                    />
+
+                  </View>
+
+
+                  <View className={`absolute bottom-0 min-w-[100%] p-5`}>
+
+                    <CustomButton 
+                      title="Add Task"
+                      textStyles="text-base text-white font-psemibold"
+                      containerStyles="min-h-[45px] rounded-md"
+                      handlePress={() => {}}
+                      icon={() => {}}
+                      iconStyle=""
+                      />
+                  </View>
+                </View>
+
+              
+            </View>
+          </Modal>
+            )}
+          </View>
+      </View>
+
+
+      <View className={`absolute bottom-0 w-full p-4 bg-white`}>
+
+          <CustomButton 
+            title="List Your Tasks"
+            textStyles="text-base text-white font-psemibold"
+            containerStyles="min-h-[45px] rounded-md"
+            handlePress={() => setIsModalVisible(true)}
+            icon={() => {}}
+            iconStyle=""
+        />
       </View>
     </SafeAreaView>
   )

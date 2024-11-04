@@ -96,6 +96,7 @@ const Home = () => {
               <TaskRow 
                 title={item?.title}
                 taskType={item?.type}
+                duration={item?.duration}
                 onPress={() => {
                   if(item?.type === 'group'){
                     setTaskId(item?.$id);

@@ -10,6 +10,8 @@ import CustomInput from '../components/CustomInput';
 import { createTask, databases, ID } from '../lib/appwrite';
 import { Picker } from '@react-native-picker/picker';
 import { useTask } from '../context/TaskContext';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { format, differenceInDays } from 'date-fns';
 
 
 const create = () => {
@@ -20,24 +22,24 @@ const create = () => {
     const [taskType, setTaskType] = useState('solo');
     const { setTaskId } = useTask();
     const [tasks, setTasks] = useState([]);
+    const [deadline, setDeadline] = useState(null);  // New state for deadline
+    const [duration, setDuration] = useState(null);  // New state for duration in days
+    const [showDatePicker, setShowDatePicker] = useState(false);
     
     const handleCreateTask = async () => {
+        if (!title || !deadline) {
+            Alert.alert('Please enter a title and select a deadline.');
+            return;
+          }
+
         try {
-          const newTask = await createTask(title, taskType); // Call the createTask function
+          const newTask = await createTask(title, taskType, deadline, duration); // Call the createTask function
           if (taskType === 'group') {
             setGroupCode(newTask.groupId); // Save the generated group code
             navigation.push('(task)', {
-                title: title,
-                taskType: taskType,
-                groupId: newTask.groupId 
-            });
-            // navigation.navigate('overview', {
-            //     groupId:{
-            //         title: title,       // Pass the title of the task
-            //         type: taskType,     // Pass the type of the task (solo or group)
-            //         groupId: newTask.groupId    // Pass the groupId (null for solo tasks)
-            //     }
-            //   });
+                title,
+                taskType,
+                groupId: newTask.groupId });
           }
           else if (taskType === 'solo') {
             setGroupCode(null); // No groupId for solo tasks, but you can reset or handle accordingly
@@ -48,6 +50,16 @@ const create = () => {
         }
       };
     
+      const handleDateChange = (event, selectedDate) => {
+        setShowDatePicker(false);
+        if (selectedDate) {
+          setDeadline(selectedDate);
+          const currentDate = new Date();
+          const days = differenceInDays(selectedDate, currentDate);
+          setDuration(days);
+        }
+      };
+
   return (
     <SafeAreaView className='bg-white h-full'>
         <View className="flex-row items-center justify-between border-b border-b-gray-400 p-3">
@@ -93,15 +105,46 @@ const create = () => {
                             <Picker.Item label="Group" value="group" />
                         </Picker>
                     </View>
+
+                
             </View>
+            
+            <View>
+                <Text className="text-base text-gray-500 font-pmedium mt-2">Deadline</Text>
+                        <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                        <TextInput
+                            value={deadline ? format(deadline, 'yyyy-MM-dd') : ''}
+                            placeholder="Select deadline date"
+                            editable={false}
+                            style={{
+                            backgroundColor: '#f2f2f2',
+                            borderColor: '#ccc',
+                            borderWidth: 1,
+                            borderRadius: 5,
+                            padding: 10,
+                            }}
+                        />
+                        </TouchableOpacity>
 
-            {/* {taskType === 'group' && groupCode && (
-                <View>
-                    <Text>Group Code: {groupCode}</Text>
-                </View>
-            )} */}
+                        {showDatePicker && (
+                        <DateTimePicker
+                            value={new Date()}
+                            mode="date"
+                            display="default"
+                            onChange={handleDateChange}
+                        />
+                        )}
 
+                        {duration !== null && (
+                        <Text className="text-gray-600 mt-2">
+                            Duration: {duration} day(s)
+                        </Text>
+                        )}
+            </View>
         </View>
+
+        
+
     </SafeAreaView>
   )
 }

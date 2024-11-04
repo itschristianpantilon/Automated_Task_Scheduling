@@ -18,7 +18,7 @@ const TaskRow = ({ taskType, title, duration, onPress }) => {
             <Text className="font-psemibold text-s capitalize">{taskType} Task</Text>
             <Text className="text-xl font-psemibold text-secondary-100">{title}</Text>
             <Text className="font-pmedium text-xs">Role: Leader</Text>
-            <Text className="font-pmedium text-xs">Duration: 50 days</Text>
+            <Text className="font-pmedium text-xs">Duration: {duration} days</Text>
 
           </View>
 

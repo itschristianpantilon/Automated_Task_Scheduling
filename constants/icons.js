@@ -16,6 +16,8 @@ import back from '../assets/icons/back.png';
 import remove from '../assets/icons/remove.png';
 import upload from '../assets/icons/upload.png';
 import threeDotEllipse from '../assets/icons/threeDotEllipse.png';
+import assign from '../assets/icons/assign.png';
+import complete from '../assets/icons/complete.png';
 
 export default {
   home,
@@ -34,5 +36,7 @@ export default {
   back,
   remove,
   upload,
-  threeDotEllipse
+  threeDotEllipse,
+  assign,
+  complete
 };

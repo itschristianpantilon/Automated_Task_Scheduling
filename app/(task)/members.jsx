@@ -112,6 +112,7 @@ const handleAcceptRequest = async (requestId, requesterId) => {
                           key={`${member.id}-${index}`} 
                           username={member.username}
                           userAvatar={member.avatar}
+                          icon={icons.remove}
                           />
                     ))
                 ) : (

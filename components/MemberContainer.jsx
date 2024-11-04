@@ -5,14 +5,14 @@ import { icons, images } from '../constants';
 import { TouchableOpacity } from 'react-native';
 
 
-const MemberContainer = ({ username, userAvatar }) => {
+const MemberContainer = ({ username, userAvatar, icon, onPress, name, style }) => {
 
     const {user, setUser, setIsLoggedIn} = useGlobalContext();
 
   return (
     <View className="relative flex-row py-2 items-center justify-between border-b border-b-gray-100/40">
         <View className="flex-row items-center">
-            <View className="w-9 h-9 border-spacing-8 rounded-full">
+            <View className="w-9 h-9 rounded-full">
                 <Image 
                     source={{ uri: userAvatar }}
                     className="w-full h-full rounded-full"
@@ -22,13 +22,16 @@ const MemberContainer = ({ username, userAvatar }) => {
             <Text className="text-base font-pregular ml-3">{username}</Text>
         </View>
         
-        <TouchableOpacity>
-            <Image 
-                source={icons.remove}
-                className='w-6 h-6 mr-2'
-                resizeMode='contain'
-            />
-        </TouchableOpacity>
+        <View className='h-auto'>
+            <TouchableOpacity onPress={onPress} className={`${style}`}>
+                <Image 
+                    source={icon}
+                    className='w-6 h-6'
+                    resizeMode='contain'
+                />
+                <Text className='text-white text-xs font-psemibold'>{name}</Text>
+            </TouchableOpacity>
+        </View>
 
     </View>
   )
