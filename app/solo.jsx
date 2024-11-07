@@ -12,6 +12,8 @@ import * as Progress from 'react-native-progress';
 import CustomButton from '../components/CustomButton'
 import CustomInput from '../components/CustomInput'
 import SoloOverviewCard from '../components/SoloOverviewCard'
+import { Query } from 'react-native-appwrite'
+import EmptyContent from '../components/EmptyContent'
 
 const solo = () => {
   const navigation = useNavigation();
@@ -21,13 +23,17 @@ const solo = () => {
   const [task, setTask] = useState(null);
   const { database } = useAppwrite();
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState(''); // State for new task title
+  const [soloTasks, setSoloTasks] = useState([]); // State for list of solo tasks
 
   useEffect(() => {
     const fetchTask = async () => {
       if (!taskId) return;
 
       try {
-        const response = await database.getDocument('670e0a0e002e9b302a34', '6711f75c00201eca940c', taskId);
+        const response = await database.getDocument(
+        '670e0a0e002e9b302a34', 
+        '6711f75c00201eca940c', taskId);
         setTask(response);
       } catch (error) {
         console.error('Error fetching task:', error);
@@ -37,6 +43,54 @@ const solo = () => {
     fetchTask();
   }, [taskId]);
   
+  const fetchSoloTasks = async () => {
+    if (!taskId) return;
+
+    try {
+      const response = await database.listDocuments(
+        '670e0a0e002e9b302a34', 
+        '6729e342001e7f976939', // Collection ID for solo tasks
+        [Query.equal('taskId', `${taskId}`)] // Filter by taskId
+      );
+      setSoloTasks(response.documents); // Set solo tasks with fetched documents
+    } catch (error) {
+      console.error('Error fetching solo tasks:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSoloTasks();
+  }, [taskId]);
+
+
+  // Function to add a new solo task to "solotasklist" collection
+  const addSoloTask = async () => {
+    if (!newTaskTitle.trim()) return;
+
+    try {
+      const newSoloTask = {
+        title: newTaskTitle,
+        taskId: taskId, // Link solo task to parent taskId
+        status: 'Ongoing'
+      };
+
+      // Store the new solo task in the "solotasklist" collection
+      const response = await database.createDocument(
+        '670e0a0e002e9b302a34', 
+        //'6711f75c00201eca940c',
+        '6729e342001e7f976939', // Collection ID for solo tasks
+        'unique()', // Generate unique ID for the document
+        newSoloTask
+      );
+
+      setSoloTasks([...soloTasks, response]); // Add new task to local state
+      setNewTaskTitle('');
+      setIsModalVisible(false);
+    } catch (error) {
+      console.error('Error adding solo task:', error);
+    }
+  };
+
   return (
     <SafeAreaView className='bg-white flex-col h-full relative'>
       <View className="pl-4 flex-row items-center justify-between">
@@ -52,7 +106,7 @@ const solo = () => {
       <View className="p-4 flex-col">
         <Text className="text-lg font-plight capitalize">{task?.type || taskType} Task</Text>
         <Text className="text-3xl font-psemibold text-secondary-100 mb-2">{task?.title || title}</Text>
-        
+        <Text className='text-xs font-pregular'>You have {task?.duration} day(s) to finish your activities within this task.</Text>
           <View className='flex-row mt-3'>
               <View className="border rounded-full border-secondary-100 mr-4">
                 <Image 
@@ -80,9 +134,20 @@ const solo = () => {
           </View>
 
           <View>
-            <ScrollView className='my-4'>
-              <SoloOverviewCard />
-            </ScrollView>
+              {soloTasks.length > 0 ? (
+                <ScrollView className='my-4'>
+                  {soloTasks.map((soloTask) => (
+                    <SoloOverviewCard key={soloTask.$id} title={soloTask.title} />
+                  ))}
+                </ScrollView>
+              ) : (
+                <View className='items-center justify-center h-[60vh]'>
+                  <EmptyContent 
+                    image={images.emptyAssignedTask}
+                    description='No activities/tasks'
+                  />
+                </View>
+              )}
           </View>
 
           <View>
@@ -114,9 +179,9 @@ const solo = () => {
                     
                     <CustomInput 
                       title='Name of the Task'
-                      value={() => {}}
+                      value={newTaskTitle}
                       placeholder=''
-                      handleChangeText={() => {}}
+                      handleChangeText={setNewTaskTitle}
                       otherStyles='mt-4'
                       textStyle='text-xs'
                     />
@@ -130,7 +195,7 @@ const solo = () => {
                       title="Add Task"
                       textStyles="text-base text-white font-psemibold"
                       containerStyles="min-h-[45px] rounded-md"
-                      handlePress={() => {}}
+                      handlePress={addSoloTask}
                       icon={() => {}}
                       iconStyle=""
                       />

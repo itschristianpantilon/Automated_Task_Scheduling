@@ -18,6 +18,7 @@ import upload from '../assets/icons/upload.png';
 import threeDotEllipse from '../assets/icons/threeDotEllipse.png';
 import assign from '../assets/icons/assign.png';
 import complete from '../assets/icons/complete.png';
+import no from '../assets/icons/No.png'
 
 export default {
   home,
@@ -38,5 +39,6 @@ export default {
   upload,
   threeDotEllipse,
   assign,
-  complete
+  complete,
+  no
 };

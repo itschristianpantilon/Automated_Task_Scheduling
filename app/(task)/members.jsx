@@ -8,6 +8,7 @@ import { useTask } from '../../context/TaskContext'
 import { icons, images } from '../../constants'
 import { useNavigation } from 'expo-router'
 import { TouchableOpacity } from 'react-native'
+import EmptyContent from '../../components/EmptyContent'
 
 const members = () => {
 
@@ -121,21 +122,27 @@ const handleAcceptRequest = async (requestId, requesterId) => {
         </ScrollView>
 
         <Text className="text-lg font-medium pb-1 mb-2 border-b border-b-gray-400">Member Request <Text>(</Text>{pendingRequests.length}<Text>)</Text></Text>
-        <ScrollView className="h-[40vh] overflow-y-hidden overflow-scroll">
     
               {pendingRequests.length > 0 ? (
-                    pendingRequests.map((request) => (
+                <ScrollView className="h-[40vh] overflow-y-hidden overflow-scroll">
+                   {pendingRequests.map((request) => (
                         <MemberRequest
                             key={request.$id}
                             request={request}
                             onAccept={() => handleAcceptRequest(request.$id, request.requesterId)}
                         />
-                    ))
+                    ))}
+                </ScrollView>
                 ) : (
-                    <Text>No pending requests.</Text>
+                    <View className='w-full h-[40vh] items-center justify-center'>
+                        <EmptyContent 
+                            description="No Pending Request!!"
+                            image={icons.no}
+                            textContainer='bg-white'
+                        />
+                    </View>
                 )}
                 
-        </ScrollView>
       </View>
     </SafeAreaView>
   )

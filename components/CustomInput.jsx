@@ -9,7 +9,7 @@ const CustomInput = ({ title, value, placeholder, handleChangeText, otherStyles,
     <View className={` ${otherStyles}`}>
       <Text className={`text-sm text-gray-500 font-pmedium`}>{title}</Text>
 
-      <View className='bg-zinc-50 w-full h-14 px-4 bg-gray rounded-md border border-gray-300 focus:border-secondary items-center flex-row'>
+      <View className='bg-zinc-50 w-full h-12 px-4 bg-gray rounded-md border border-gray-300 focus:border-secondary items-center flex-row'>
         <TextInput 
             className='flex-1 font-psemibold text-base w-full'
             value={value}

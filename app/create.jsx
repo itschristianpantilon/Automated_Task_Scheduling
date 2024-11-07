@@ -46,7 +46,7 @@ const create = () => {
             navigation.push('solo', { groupId: null, title }); // Navigate to overview without a groupId
           }
         } catch (error) {
-          console.error('Failed to create task:', error);
+          console.error('Failed to create task in create page:', error);
         }
       };
     

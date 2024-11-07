@@ -24,18 +24,7 @@ const profile = () => {
   const buttonStyle = "justify-between px-5 bg-white rounded-none mb-3 border-b border-b-secondary-100";
 
   return (
-  //   <View className="w-full flex justify-center items-center mt-6 mb-12 px-4 bg-black">
-  //   <TouchableOpacity
-  //     onPress={logout}
-  //     className="flex w-full items-end mb-10"
-  //   >
-  //     <Image
-  //       source={icons.logout}
-  //       resizeMode="contain"
-  //       className="w-6 h-6"
-  //     />
-  //   </TouchableOpacity>
-  // </View>
+ 
     <SafeAreaView className="h-full w-full px-4 bg-white">
       <View className="items-center justify-center h-16">
         <Text className="font-psemibold text-xl">Profile</Text>
@@ -55,18 +44,7 @@ const profile = () => {
       </View>
 
     <View className="mt-2">
-      {/* <TouchableOpacity className="w-full h-12 bg-slate-200 flex-row items-center justify-between px-4">
-        <Text className="font-pmedium text-lg">Edit Profile</Text>
-      </TouchableOpacity>
 
-      <TouchableOpacity className="w-full h-12 bg-slate-200 flex-row items-center justify-between px-4" onPress={logout}>
-        <Text className="font-pmedium text-lg">Sign Out</Text>
-        <Image
-          source={icons.logout}
-          className='w-8 h-8'
-          resizeMode='contain'
-        />
-      </TouchableOpacity> */}
       <CustomButton 
         title="Edit Profile"
         containerStyles={buttonStyle}

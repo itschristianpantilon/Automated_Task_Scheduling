@@ -4,19 +4,13 @@ import { useGlobalContext } from '../context/GlobalProvider'
 import { TouchableOpacity } from 'react-native';
 import { icons } from '../constants';
 
-const SoloOverviewCard = () => {
+const SoloOverviewCard = ({ title }) => {
     
   return (
     <View className='border border-gray-400/70 flex-row items-center justify-between p-4 rounded-md mb-3'>
         <View className='flex-1'>
-            <Text className='text-lg font-pmedium mb-1'>Chapter 1 Introduction</Text>
+            <Text className='text-lg font-pmedium mb-1'>{title}</Text>
             <View className='flex-row items-center'>
-                {/* <Image 
-                    source={{ uri: user?.avatar}}
-                    className='w-6 h-6 rounded-full mr-2'
-                    resizeMode='contain'
-                />
-                <Text className='text-sm font-pregular'>{user?.username}</Text> */}
             </View>
         </View>
         <TouchableOpacity className='border border-gray-400 p-1'>

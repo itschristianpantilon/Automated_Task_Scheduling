@@ -1,6 +1,6 @@
 import { View, Text, FlatList, Image, ScrollView, TouchableOpacity } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { icons, images } from '../../constants'
 import { useGlobalContext } from '../../context/GlobalProvider'
 import TaskRow from '../../components/TaskRow';
@@ -9,6 +9,7 @@ import { router, useNavigation } from 'expo-router'
 import { useAppwrite } from '../../context/AppwriteClient'
 import { useTask } from '../../context/TaskContext'
 import { Query } from 'react-native-appwrite'
+import EmptyContent from '../../components/EmptyContent'
 
 
 
@@ -22,38 +23,34 @@ const Home = () => {
 
   const { setTaskId } = useTask();
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const response = await database.listDocuments(
-          '670e0a0e002e9b302a34',
-          '6711f75c00201eca940c',
-          [Query.equal('userId', user.$id)]
-          
-        );
-        setTasks(response.documents);
-        // const response = await database.listDocuments('670e0a0e002e9b302a34', '6711f75c00201eca940c');
-        // // Filter tasks by `userId` on the client side
-        // const userTasks = response.documents.filter(task => task.userId === user.$id);
-        // setTasks(userTasks);
-      } catch (error) {
-        console.error('Error fetching tasks:', error);
-      }
-    };
-
-
-    if (user && user.$id) {
-      fetchTasks(user.$id);
+  const fetchTasks = useCallback(async () => {
+    if (!user || !user.$id) return;
+    try {
+      const response = await database.listDocuments(
+        '670e0a0e002e9b302a34',
+        '6711f75c00201eca940c',
+        [Query.search('members', user.$id)],
+        [Query.equal('userId', user.$id)], 
+      );
+      setTasks(response.documents);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
     }
-  }, [user]);
+  }, [database, user]);
 
-  
+  useEffect(() => {
+    if (user && user.$id) {
+      fetchTasks();
+    } else {
+      setTasks([]);
+    }
+  }, [user, fetchTasks]);
 
   
   return (
     <SafeAreaView className="w-full h-full bg-white">
 
-      <View className="flex-row w-full py-2 items-center justify-between px-4 border-b border-b-gray-300">
+      <View className="flex-row w-full py-2 items-center justify-between px-4 border-b border-b-gray-300 mb-3">
         <View className='flex-row items-center gap-2'>
             <View className="w-8 h-8 rounded-full">
               <Image 
@@ -80,19 +77,15 @@ const Home = () => {
         </View>
       </View>
       
-<View>
-
-</View>
-
       <FlatList 
         data={tasks}
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => (
           <View className='px-2'>
 
-            <ScrollView>
 
 
+            <ScrollView className=''>
               <TaskRow 
                 title={item?.title}
                 taskType={item?.type}
@@ -109,27 +102,27 @@ const Home = () => {
                 }
               />
             </ScrollView>
+           
+
           </View>
         )}
-        ListHeaderComponent={() => (
-          <View className={`p-2`}>
+        // ListHeaderComponent={() => (
+        //   <View className={`p-2`}>
   
-           <Text>{tasks.length > 0 ? 'Your Task' : 'Create Task'}</Text>
-          </View>
+        //    <Text>{tasks.length > 0 ? 'Your Task' : ''}</Text>
+        //   </View>
           
-        )}
+        // )}
         ListEmptyComponent={() => (
-          <View>
-            
+          <View className='w-full h-[70vh] p-4 items-center justify-center'>
+            <EmptyContent 
+              description="You currently have no tasks. Tap 'Create Task' to add your first task and start planning!"
+              image={images.emptyPage}
+              textContainer='bg-secondary-100/5'
+            />
           </View>
         )}
-        ListFooterComponent={() => (
-              <Image 
-                source={images.taskManagerLogoInverted}
-                className="w-9 h-10 absolute"
-                resizeMode='contain'
-              />
-        )}
+        
       />
     </SafeAreaView>
   )

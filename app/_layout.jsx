@@ -7,6 +7,7 @@ import GlobalProvider from '../context/GlobalProvider';
 import { TaskProvider } from '../context/TaskContext';
 
 
+
 SplashScreen.preventAutoHideAsync();
 
 const RootLayout = () => {
