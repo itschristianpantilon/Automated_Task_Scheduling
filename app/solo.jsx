@@ -137,7 +137,10 @@ const solo = () => {
               {soloTasks.length > 0 ? (
                 <ScrollView className='my-4'>
                   {soloTasks.map((soloTask) => (
-                    <SoloOverviewCard key={soloTask.$id} title={soloTask.title} />
+                    <SoloOverviewCard 
+                      key={soloTask.$id} 
+                      title={soloTask.title} 
+                    />
                   ))}
                 </ScrollView>
               ) : (

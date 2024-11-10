@@ -18,6 +18,7 @@ import CustomInput from '../../components/CustomInput'
 import { useGlobalContext } from '../../context/GlobalProvider'
 import { ID, Query } from 'react-native-appwrite'
 import EmptyContent from '../../components/EmptyContent'
+import SubmitForm from '../../components/SubmitForm'
 
 
 const overview = () => {
@@ -35,36 +36,37 @@ const overview = () => {
   const [assignedTasks, setAssignedTasks] = useState([]);
   const [assignTaskTitle, setAssignTaskTitle] = useState('');
   const [selectedMember, setSelectedMember] = useState(null);
+  const [isSubmit, setIsSubmit] = useState(false);
 
 
-  useEffect(() => {
-    const fetchTask = async () => {
-      if (!taskId) return;
+//Fetch Task
+const fetchTask = async () => {
+  if (!taskId) return;
 
-      try {
-        const response = await database.getDocument('670e0a0e002e9b302a34', '6711f75c00201eca940c', taskId);
-        setTask(response);
+  try {
+    const response = await database.getDocument('670e0a0e002e9b302a34', '6711f75c00201eca940c', taskId);
+    setTask(response);
 
-        if (!isCreator && response.userId === user?.$id) {
-          setIsCreator(true);
-        }
-                
-      } catch (error) {
-        console.error('Error fetching task:', error);
-      }
-    };
-    
+    if (!isCreator && response.userId === user?.$id) {
+      setIsCreator(true);
+    }
+            
+  } catch (error) {
+    console.error('Error fetching task:', error);
+  }
+};
+
+useEffect(() => {
     fetchTask();
-  }, [taskId, user?.$id]);
+}, [taskId, user?.$id]);
 
-
+  //Fetch Members
 useEffect(() => {
   const cleanMemberData = (member) => ({
       id: String(member.$id), // Convert member's ID to a string
       username: member.username,
       avatar: member.avatar,
   });
-
   const fetchMemberDetails = async (memberIds) => {
       try {
           const memberDetails = await Promise.all(
@@ -82,7 +84,6 @@ useEffect(() => {
           console.error('Failed to fetch member details:', error);
       }
   };
-
   // New function to fetch only member IDs as an array of strings
   const fetchMemberIdsOnly = async () => {
       try {
@@ -93,7 +94,6 @@ useEffect(() => {
           console.error('Failed to fetch member IDs:', error);
       }
   };
-
   // Fetches members with full details for the task by taskId
   const fetchMembers = async () => {
       try {
@@ -109,99 +109,33 @@ useEffect(() => {
   fetchMembers();
 }, [taskId]);
 
-
   //Fetch Assign Task
-  // useEffect(() => {
-  //   const fetchAssignedTasks = async () => {
-  //     try {
-  //       const response = await database.listDocuments(
-  //         config.databaseId,
-  //         config.groupAssignedTasksCollectionId,
-  //         [Query.equal("taskId", taskId)] // Fetch tasks linked to the current taskId
-  //       );
-  //       setAssignedTasks(response.documents);
-  //     } catch (error) {
-  //       console.error('Error fetching assigned tasks:', error);
-  //     }
-  //   };
-  
-  //   fetchAssignedTasks();
-  // }, [taskId]);
-  
+  const fetchAssignedTasks = async () => {
+    try {
+      const response = await database.listDocuments(
+        config.databaseId,
+        config.groupAssignedTasksCollectionId,
+        [Query.equal("taskId", taskId)]
+      );
+
+      // Map response to ensure each task has all needed fields
+      const tasksWithDetails = response.documents.map(task => ({
+        ...task,
+        username: task.username || '',  // Ensure username is present
+        avatar: task.avatar || '',      // Ensure avatar is present
+        status: task.status || 'Ongoing',  // Default to 'Ongoing' if missing
+        memberId: task.memberId,
+      }));
+
+      setAssignedTasks(tasksWithDetails);
+    } catch (error) {
+      console.error('Error fetching assigned tasks:', error);
+    }
+  };
   useEffect(() => {
-    const fetchAssignedTasks = async () => {
-      try {
-        const response = await database.listDocuments(
-          config.databaseId,
-          config.groupAssignedTasksCollectionId,
-          [Query.equal("taskId", taskId)]
-        );
-  
-        // Map response to ensure each task has all needed fields
-        const tasksWithDetails = response.documents.map(task => ({
-          ...task,
-          username: task.username || '',  // Ensure username is present
-          avatar: task.avatar || '',      // Ensure avatar is present
-          status: task.status || 'Ongoing'  // Default to 'Ongoing' if missing
-        }));
-  
-        setAssignedTasks(tasksWithDetails);
-      } catch (error) {
-        console.error('Error fetching assigned tasks:', error);
-      }
-    };
-  
     fetchAssignedTasks();
   }, [taskId]);
   
-
-//   const handleAssignTask = async (memberId, taskTitle) => {
-//     try {
-//         const assignedTask = await assignTaskToMember(taskId, memberId, taskTitle);
-        
-//         // Update the task overview with the new assignment
-//         setAssignedTasks((prevAssignedTasks) => [
-//             ...prevAssignedTasks,
-//             {
-//                 taskTitle,
-//                 memberId,
-//                 username: members.find((member) => member.id === memberId)?.username,
-//             }
-//         ]);
-
-//         // Close the modal after assignment
-//         setAssignTask(false);
-//     } catch (error) {
-//         console.error("Error assigning task:", error);
-//     }
-// };
-
-// const handleAssignTask = async () => {
-//   if (!selectedMember || !assignTaskTitle) return 
-//   try {
-//     const assignedTask = await assignTaskToMember(taskId, selectedMember.id, assignTaskTitle);
-
-
-//     const assignedTaskDetails = {
-//       ...assignedTask,
-//       taskTitle: assignTaskTitle,
-//       username: selectedMember.username,
-//       avatar: selectedMember.avatar,
-//       status: 'Ongoing', // Set initial status
-//     };
-
-//     // Update state to display new assignment in the UI
-//     setAssignedTasks((prevTasks) => [...prevTasks, assignedTaskDetails]);
-
-//     // After assigning, we can display this assigned task in the UI
-//     //setAssignedTasks((prevTasks) => [...prevTasks, assignedTask]);
-
-//     // Optionally, you can close the modal or reset states
-//     setAssignTask(false);  // Close the modal
-//   } catch (error) {
-//     console.error('Error assigning task:', error);
-//   }
-// };
 
 const handleAssignTask = async () => {
   if (!selectedMember || !assignTaskTitle) return;
@@ -225,7 +159,7 @@ const handleAssignTask = async () => {
   } catch (error) {
     console.error('Error assigning task:', error);
   }
-};
+  };
 
 const copyToClipboard = () => {
     if (task?.$id) {
@@ -241,20 +175,31 @@ const copyToClipboard = () => {
 
   const openAssignTask = () => {
     setIsModalVisible(true);
-  }
+  };
 
   const openAssignTaskModal = (member) => {
     setSelectedMember(member) // Set selected member
     setAssignTask(true)
-  }
+  };
+
+  const openSubmitContainer = (assignedTask) => {
+    setSelectedMember(assignedTask) // Set selected member
+    setIsSubmit(true)
+  };
 
   const closeModal = () => {
     setIsModalVisible(false)
     setAssignTask(false)
     setAssignTaskTitle('')
+  };
+  const isSubmitClose = () => {
+    setIsSubmit(false);
   }
-  //console.log('Assigned Task:', assignedTask);
-//console.log('Task:', task);
+
+  const refreshTaskDetails = () => {
+    fetchAssignedTasks();
+    fetchTask();  // To reload task details
+};
 
   return (
     <SafeAreaView className='bg-white flex-col h-full relative'>
@@ -321,6 +266,7 @@ const copyToClipboard = () => {
                       username={assignedTask?.username}
                       userAvatar={{ uri: assignedTask?.avatar }} // Set avatar if available
                       status={assignedTask?.status}
+                      onPress={openSubmitContainer}
                     />
                   ))}
             </ScrollView>
@@ -335,6 +281,46 @@ const copyToClipboard = () => {
           )}
 
       </View>
+
+      {isSubmit && (
+        <Modal
+        transparent={true}
+        animationType="fade"
+        visible={isSubmit}
+        onRequestClose={isSubmitClose}
+        >
+        <View className='flex-1 justify-center items-center bg-black/50'>
+          
+
+            <View className="w-[95%] p-5 bg-white rounded-lg min-h-[85vh]">
+              <View className='flex-row items-center justify-between pb-2 border-b border-b-gray-300'>
+                <Text className="text-lg font-psemibold">Your Work</Text>
+                <TouchableOpacity onPress={isSubmitClose} className="">
+                  <Image 
+                    source={icons.close}
+                    className='w-6 h-6'
+                    resizeMode='contain'
+                  />
+                </TouchableOpacity>
+
+              </View>
+
+              <View className='relative'>
+                <SubmitForm 
+                  assignedTaskId={assignedTasks?.$id}
+                  isCreator={isCreator}
+                  taskId={taskId}
+                  refreshTaskDetails={refreshTaskDetails}
+                  memberId={selectedMember?.memberId}
+                />
+              </View>
+
+            </View>
+
+          
+        </View>
+      </Modal>
+      )}
 
       {isModalVisible && (
         <Modal
@@ -394,13 +380,13 @@ const copyToClipboard = () => {
           visible={assignTask}
           onRequestClose={() => setAssignTask(false)}
         >
-          <View className='flex-1 justify-center items-center bg-black/50'>
+          <View className='flex-1 justify-center items-center bg-black/60'>
             
 
-              <View className="min-w-[95%] p-5 bg-white rounded-lg min-h-[85vh] relative">
+              <View className="min-w-[95%] p-5 bg-white rounded-lg min-h-[50vh] relative">
                 
                 <View className='flex-row items-center justify-between'>
-                  <Text className='font-psemibold text-lg'>Assign To</Text>
+                  <Text className='font-psemibold text-lg'>Assign To:</Text>
 
                   <TouchableOpacity onPress={() => setAssignTask(false)}>
                     <Image 
@@ -412,7 +398,14 @@ const copyToClipboard = () => {
                 </View>
 
                 <View className='py-2'>
-                  <Text>Member Name</Text>
+                  <View className='flex-row items-center'>
+                    <Image 
+                      source={{ uri: selectedMember?.avatar}}
+                      className='w-7 h-7 rounded-full mr-2'
+                      resizeMode='contain'
+                    />
+                    <Text className='text-sm font-pregular'>{selectedMember?.username}</Text>
+                  </View>
 
                  <CustomInput 
                   title='Name of the Task'

@@ -10,6 +10,7 @@ import { useAppwrite } from '../../context/AppwriteClient'
 import { useTask } from '../../context/TaskContext'
 import { Query } from 'react-native-appwrite'
 import EmptyContent from '../../components/EmptyContent'
+import PopUpRemove from '../../components/PopUpRemove'
 
 
 
@@ -23,6 +24,16 @@ const Home = () => {
 
   const { setTaskId } = useTask();
 
+  const [openModal, setOpenModal] = useState(false);
+
+  const onTouchClose = () => {
+    setOpenModal(false);
+}
+
+  const OpenModal = () => {
+    setOpenModal(true);
+  }
+
   const fetchTasks = useCallback(async () => {
     if (!user || !user.$id) return;
     try {
@@ -31,6 +42,7 @@ const Home = () => {
         '6711f75c00201eca940c',
         [Query.search('members', user.$id)],
         [Query.equal('userId', user.$id)], 
+        
       );
       setTasks(response.documents);
     } catch (error) {
@@ -90,6 +102,7 @@ const Home = () => {
                 title={item?.title}
                 taskType={item?.type}
                 duration={item?.duration}
+                threeDotBtn={OpenModal}
                 onPress={() => {
                   if(item?.type === 'group'){
                     setTaskId(item?.$id);
@@ -123,6 +136,11 @@ const Home = () => {
           </View>
         )}
         
+      />
+      <PopUpRemove 
+        onPress={openModal}
+        setOnpress={setOpenModal}
+        onTouchClose={onTouchClose}
       />
     </SafeAreaView>
   )

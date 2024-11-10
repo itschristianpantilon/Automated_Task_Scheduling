@@ -18,7 +18,10 @@ import upload from '../assets/icons/upload.png';
 import threeDotEllipse from '../assets/icons/threeDotEllipse.png';
 import assign from '../assets/icons/assign.png';
 import complete from '../assets/icons/complete.png';
-import no from '../assets/icons/No.png'
+import no from '../assets/icons/No.png';
+import pdf from '../assets/icons/pdf.png';
+import word from '../assets/icons/word.png';
+import powerpoint from '../assets/icons/powerpoint.png';
 
 export default {
   home,
@@ -40,5 +43,8 @@ export default {
   threeDotEllipse,
   assign,
   complete,
-  no
+  no,
+  pdf,
+  word,
+  powerpoint
 };

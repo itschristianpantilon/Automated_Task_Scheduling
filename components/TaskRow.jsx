@@ -1,14 +1,16 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import { View, Text, Modal } from 'react-native'
+import React, { useState } from 'react'
 import PopUpMenu from './PopUpMenu'
 import { images } from '../constants'
 import { TouchableOpacity } from 'react-native';
+import { Image } from 'react-native';
 
 
 
 
-const TaskRow = ({ taskType, title, duration, onPress }) => {
+const TaskRow = ({ taskType, title, duration, onPress, threeDotBtn }) => {
 
+  
 
   return (
     <TouchableOpacity onPress={onPress}>
@@ -23,7 +25,15 @@ const TaskRow = ({ taskType, title, duration, onPress }) => {
           </View>
 
           <View className=''>
-            <PopUpMenu icon={images.threeDot} otherStyles="w-5 h-5" />
+            <TouchableOpacity onPress={threeDotBtn}>
+              <Image
+                source={images.threeDot}
+                className='w-5 h-5'
+                resizeMode='contain'
+              />
+            </TouchableOpacity>
+
+        
           </View>
         </View>
       </View>
