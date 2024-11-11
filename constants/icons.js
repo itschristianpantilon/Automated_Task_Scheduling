@@ -22,6 +22,8 @@ import no from '../assets/icons/No.png';
 import pdf from '../assets/icons/pdf.png';
 import word from '../assets/icons/word.png';
 import powerpoint from '../assets/icons/powerpoint.png';
+import arrowRight from '../assets/icons/arrowRight.png';
+import editPencil from '../assets/icons/editPencil.png';
 
 export default {
   home,
@@ -46,5 +48,7 @@ export default {
   no,
   pdf,
   word,
-  powerpoint
+  powerpoint,
+  arrowRight,
+  editPencil
 };

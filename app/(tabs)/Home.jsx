@@ -119,13 +119,6 @@ const Home = () => {
 
           </View>
         )}
-        // ListHeaderComponent={() => (
-        //   <View className={`p-2`}>
-  
-        //    <Text>{tasks.length > 0 ? 'Your Task' : ''}</Text>
-        //   </View>
-          
-        // )}
         ListEmptyComponent={() => (
           <View className='w-full h-[70vh] p-4 items-center justify-center'>
             <EmptyContent 
