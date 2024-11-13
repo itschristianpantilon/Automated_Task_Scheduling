@@ -9,14 +9,41 @@ import { icons, images } from '../../constants'
 import { useNavigation } from 'expo-router'
 import { TouchableOpacity } from 'react-native'
 import EmptyContent from '../../components/EmptyContent'
+import { useGlobalContext } from '../../context/GlobalProvider'
+import { useAppwrite } from '../../context/AppwriteClient'
 
 const members = () => {
 
-
+    const { user } = useGlobalContext();
     const { taskId } = useTask();
     const [pendingRequests, setPendingRequests] = useState([]);
     const [members, setMembers] = useState([]);
     const navigation = useNavigation();
+    const [isCreator, setIsCreator] = useState(false);
+
+    const [task, setTask] = useState(null);
+    const { database } = useAppwrite();
+   
+  
+    const fetchTask = async () => {
+      if (!taskId) return;
+    
+      try {
+        const response = await database.getDocument('670e0a0e002e9b302a34', '6711f75c00201eca940c', taskId);
+        setTask(response);
+                
+        if (!isCreator && response.userId === user?.$id) {
+          setIsCreator(true);
+        }
+  
+      } catch (error) {
+        console.error('Error fetching task:', error);
+      }
+    };
+    
+    useEffect(() => {
+        fetchTask();
+    }, [taskId, user?.$id]);
 
 
   useEffect(() => {
@@ -54,6 +81,8 @@ const members = () => {
           const task = await databases.getDocument(config.databaseId, config.taskCollectionId, taskId);
           const memberIds = task.members || []; // Assuming `task.members` is an array of IDs
           fetchMemberDetails(memberIds); // Fetch full details of each member
+        
+    
       } catch (error) {
           console.error('Failed to fetch members:', error);
       }
@@ -114,6 +143,8 @@ const handleAcceptRequest = async (requestId, requesterId) => {
                           username={member.username}
                           userAvatar={member.avatar}
                           icon={icons.remove}
+                          isCreator={member.isCreator}
+                          isCurrentUserCreator={isCreator}
                           />
                     ))
                 ) : (

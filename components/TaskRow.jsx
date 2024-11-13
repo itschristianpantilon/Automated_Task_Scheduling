@@ -14,7 +14,7 @@ const TaskRow = ({ taskType, title, duration, onPress, threeDotBtn }) => {
 
   return (
     <TouchableOpacity onPress={onPress}>
-      <View className="px-4 space-y-6 bg-gray-200/20 rounded-md mb-2 border border-gray-400 hover:border-secondary-100 min-h-[15vh]">
+      <View className="px-4 space-y-6 rounded-md mb-2 border border-gray-400 hover:border-secondary-100 min-h-[15vh]">
         <View className="justify-between items-start flex-row mb-5 py-2 mt-2">
           <View>
             <Text className="font-psemibold text-xs capitalize">{taskType} Task</Text>

@@ -25,6 +25,7 @@ const create = () => {
     const [deadline, setDeadline] = useState(null);  // New state for deadline
     const [duration, setDuration] = useState(null);  // New state for duration in days
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [status, setStatus] = useState('');
     
     const handleCreateTask = async () => {
         if (!title || !deadline) {
@@ -33,7 +34,10 @@ const create = () => {
           }
 
         try {
-          const newTask = await createTask(title, taskType, deadline, duration); // Call the createTask function
+          const newTask = await createTask(title, taskType, deadline, duration, status); // Call the createTask function
+          setStatus(newTask.status);
+          setTaskId(newTask.$id);
+          
           if (taskType === 'group') {
             setGroupCode(newTask.groupId); // Save the generated group code
             navigation.push('(task)', {

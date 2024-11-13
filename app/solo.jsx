@@ -14,6 +14,7 @@ import CustomInput from '../components/CustomInput'
 import SoloOverviewCard from '../components/SoloOverviewCard'
 import { Query } from 'react-native-appwrite'
 import EmptyContent from '../components/EmptyContent'
+import moment from 'moment/moment'
 
 const solo = () => {
   const navigation = useNavigation();
@@ -68,10 +69,29 @@ const solo = () => {
     if (!newTaskTitle.trim()) return;
 
     try {
+
+      // Calculate the solo task duration and deadline based on the main task
+      const mainTaskDeadline = task?.deadline;
+      const mainTaskDuration = task?.duration;
+      let soloTaskDeadline = mainTaskDeadline;
+      let soloTaskDuration = mainTaskDuration;
+
+      if (mainTaskDeadline) {
+        // Set solo task deadline as a fraction of the main task deadline if needed
+        soloTaskDeadline = moment(mainTaskDeadline).subtract(1, 'days').format('YYYY-MM-DD');
+      }
+
+      if (mainTaskDuration) {
+        // Set solo task duration as a fraction of main task duration if needed
+        soloTaskDuration = Math.floor(mainTaskDuration / 2); // For example, half the duration
+      }
+
       const newSoloTask = {
         title: newTaskTitle,
         taskId: taskId, // Link solo task to parent taskId
-        status: 'Ongoing'
+        status: 'Ongoing',
+        deadline: soloTaskDeadline,
+        duration: soloTaskDuration,
       };
 
       // Store the new solo task in the "solotasklist" collection
@@ -90,6 +110,8 @@ const solo = () => {
       console.error('Error adding solo task:', error);
     }
   };
+
+
 
   return (
     <SafeAreaView className='bg-white flex-col h-full relative'>
@@ -140,6 +162,8 @@ const solo = () => {
                     <SoloOverviewCard 
                       key={soloTask.$id} 
                       title={soloTask.title} 
+                      duration={soloTask.duration}
+                      deadline={soloTask.deadline}
                     />
                   ))}
                 </ScrollView>

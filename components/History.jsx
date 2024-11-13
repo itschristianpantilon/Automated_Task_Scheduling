@@ -22,7 +22,7 @@ const History = ({ visible, onRequestClose, onPress }) => {
           <View className='w-full h-full flex-1 justify-center items-center bg-black/60'>
             
 
-              <View className="min-w-[90%] p-5 bg-white rounded-lg min-h-[90vh] relative">
+              <View className="min-w-[95%] p-5 bg-white rounded-lg min-h-[90vh] relative">
                 <View className='flex-row items-center justify-between'>
                     <Text className='text-lg font-psemibold'>History</Text>
                     <TouchableOpacity onPress={onPress}>

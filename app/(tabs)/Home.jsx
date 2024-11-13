@@ -42,9 +42,15 @@ const Home = () => {
         '6711f75c00201eca940c',
         [Query.search('members', user.$id)],
         [Query.equal('userId', user.$id)], 
-        
+
       );
-      setTasks(response.documents);
+      //setTasks(response.documents);
+       // Sort tasks by $createdAt in descending order
+       const sortedTasks = response.documents.sort((a, b) => {
+        return new Date(b.$createdAt) - new Date(a.$createdAt);
+      });
+
+      setTasks(sortedTasks);
     } catch (error) {
       console.error('Error fetching tasks:', error);
     }
@@ -102,7 +108,10 @@ const Home = () => {
                 title={item?.title}
                 taskType={item?.type}
                 duration={item?.duration}
-                threeDotBtn={OpenModal}
+                threeDotBtn={() => {
+                  OpenModal();
+                  setTaskId(item?.$id);
+                }}
                 onPress={() => {
                   if(item?.type === 'group'){
                     setTaskId(item?.$id);
@@ -130,11 +139,14 @@ const Home = () => {
         )}
         
       />
-      <PopUpRemove 
-        onPress={openModal}
-        setOnpress={setOpenModal}
-        onTouchClose={onTouchClose}
-      />
+
+      {openModal && (
+          <PopUpRemove 
+            onPress={openModal}
+            setOnpress={setOpenModal}
+            onTouchClose={onTouchClose}
+          />
+      )}
     </SafeAreaView>
   )
 }

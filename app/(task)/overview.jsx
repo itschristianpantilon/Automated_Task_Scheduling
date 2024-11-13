@@ -19,6 +19,7 @@ import { useGlobalContext } from '../../context/GlobalProvider'
 import { ID, Query } from 'react-native-appwrite'
 import EmptyContent from '../../components/EmptyContent'
 import SubmitForm from '../../components/SubmitForm'
+import PopUpRemove from '../../components/PopUpRemove'
 
 
 const overview = () => {
@@ -37,6 +38,7 @@ const overview = () => {
   const [assignTaskTitle, setAssignTaskTitle] = useState('');
   const [selectedMember, setSelectedMember] = useState(null);
   const [isSubmit, setIsSubmit] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
 
 
 //Fetch Task
@@ -201,9 +203,17 @@ const copyToClipboard = () => {
     fetchTask();  // To reload task details
 };
 
+const onTouchClose = () => {
+  setOpenModal(false);
+}
+
+const OpenModal = () => {
+  setOpenModal(true);
+}
+
   return (
     <SafeAreaView className='bg-white flex-col h-full relative'>
-      <View className="pl-4 flex-row items-center justify-between">
+      <View className="px-4 flex-row items-center justify-between">
                 <TouchableOpacity className='' onPress={() => { router.replace('/Home')}}>
                     <Image 
                         source={icons.back}
@@ -211,7 +221,13 @@ const copyToClipboard = () => {
                         resizeMode='contain'
                     />
                 </TouchableOpacity>
-                <PopUpMenu icon={images.threeDot} otherStyles="w-5 h-5 mr-4" />
+                <TouchableOpacity onPress={OpenModal}>
+                  <Image
+                    source={images.threeDot}
+                    className='w-5 h-5'
+                    resizeMode='contain'
+                  />
+                </TouchableOpacity>
       </View>
       <View className="p-4 flex-col">
         <Text className="text-base font-plight capitalize">{task?.type || taskType} Task</Text>
@@ -355,10 +371,9 @@ const copyToClipboard = () => {
                               key={`${member.id}-${index}`} 
                               username={member.username}
                               userAvatar={member.avatar}
-                              icon={icons.assign}
+                              icon={icons.plus}
                               onPress={() => openAssignTaskModal(member)}
-                              name='Assign'
-                              style='flex-row items-center justify-center border rounded-md bg-secondary-100 p-1 border-gray-400'
+                              style=''
                             />
                         ))
                     ) : (
@@ -451,6 +466,14 @@ const copyToClipboard = () => {
         </View>
       )}
 
+      {openModal && (
+          <PopUpRemove 
+            onPress={openModal}
+            setOnpress={setOpenModal}
+            onTouchClose={onTouchClose}
+          />
+      )}
+      
     </SafeAreaView>
   )
 }
