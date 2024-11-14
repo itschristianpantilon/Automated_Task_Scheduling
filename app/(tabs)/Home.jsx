@@ -1,4 +1,4 @@
-import { View, Text, FlatList, Image, ScrollView, TouchableOpacity } from 'react-native'
+import { View, Text, FlatList, Image, ScrollView, TouchableOpacity, RefreshControl } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import React, { useCallback, useEffect, useState } from 'react'
 import { icons, images } from '../../constants'
@@ -25,6 +25,12 @@ const Home = () => {
   const { setTaskId } = useTask();
 
   const [openModal, setOpenModal] = useState(false);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  
+
+
 
   const onTouchClose = () => {
     setOpenModal(false);
@@ -63,6 +69,13 @@ const Home = () => {
       setTasks([]);
     }
   }, [user, fetchTasks]);
+
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchTasks();
+    setRefreshing(false);
+  }, [fetchTasks]);
 
   
   return (
@@ -137,7 +150,9 @@ const Home = () => {
             />
           </View>
         )}
-        
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
 
       {openModal && (

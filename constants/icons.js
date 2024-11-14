@@ -24,6 +24,9 @@ import word from '../assets/icons/word.png';
 import powerpoint from '../assets/icons/powerpoint.png';
 import arrowRight from '../assets/icons/arrowRight.png';
 import editPencil from '../assets/icons/editPencil.png';
+import commentSlash from '../assets/icons/commentSlash.png';
+import noAttachment from '../assets/icons/noAttachment.png';
+import noPending from '../assets/icons/noPending.png';
 
 export default {
   home,
@@ -50,5 +53,8 @@ export default {
   word,
   powerpoint,
   arrowRight,
-  editPencil
+  editPencil,
+  commentSlash,
+  noAttachment,
+  noPending
 };

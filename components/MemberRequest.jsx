@@ -1,6 +1,5 @@
-import { View, Text, Image } from 'react-native'
-import React from 'react'
-import { useGlobalContext } from '../context/GlobalProvider';
+import { View, Text, Image } from 'react-native';
+import React from 'react';
 import { TouchableOpacity } from 'react-native';
 
 const Button = ({ title, textStyles, otherStyle, onPress}) => (
@@ -9,9 +8,8 @@ const Button = ({ title, textStyles, otherStyle, onPress}) => (
     </TouchableOpacity>
 )
 
-const MemberRequest = ({ request, onAccept }) => {
+const MemberRequest = ({ request, onAccept, onReject }) => {
 
-    const {user, setUser, setIsLoggedIn} = useGlobalContext();
 
   return (
     <View className="flex-row py-2 items-center justify-between h-14">
@@ -37,6 +35,7 @@ const MemberRequest = ({ request, onAccept }) => {
                     title="Decline"
                     otherStyle="bg-white border border-gray-400"
                     textStyles="text-black"
+                    onPress={() => onReject(request.$id)}
                 />
             </View>
         </View>

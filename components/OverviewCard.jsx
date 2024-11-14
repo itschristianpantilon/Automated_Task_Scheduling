@@ -4,7 +4,7 @@ import { useGlobalContext } from '../context/GlobalProvider'
 import { TouchableOpacity } from 'react-native';
 import { icons } from '../constants';
 
-const OverviewCard = ({ title, username, userAvatar, status, onPress }) => {
+const OverviewCard = ({ title, username, userAvatar, status, onPress, onHide }) => {
     const { user } = useGlobalContext();
   return (
     <View className='border border-gray-400/70 flex-row items-center justify-between p-4 rounded-md mb-3 w-full'>
@@ -22,7 +22,7 @@ const OverviewCard = ({ title, username, userAvatar, status, onPress }) => {
         <View className='mr-4'>
             <Text className='text-md font-pregular'>{status}</Text>
         </View>
-        <TouchableOpacity className='border border-gray-300 p-1' onPress={onPress}>
+        <TouchableOpacity className={`border border-gray-300 p-1 ${onHide}`} onPress={onPress}>
             <Image 
                 source={icons.threeDotEllipse}
                 className='w-7 h-6'

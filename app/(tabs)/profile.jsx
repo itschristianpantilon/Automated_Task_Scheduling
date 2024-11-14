@@ -105,7 +105,7 @@ const profile = () => {
           <View className='w-full h-full flex-1 justify-center items-center bg-black/60'>
             
 
-              <View className="min-w-[75%] p-5 bg-white rounded-lg min-h-[15vh] relative justify-center">
+              <View className="min-w-[85%] p-5 bg-white rounded-sm min-h-[15vh] relative justify-center">
                 <View>
                   <Text className='text-xl font-psemibold mb-5'>Logout</Text>
 

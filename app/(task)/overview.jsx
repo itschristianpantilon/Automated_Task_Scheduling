@@ -1,4 +1,4 @@
-import { View, Text, Image, Alert, ToastAndroid, Platform, FlatList, ScrollView, Modal } from 'react-native'
+import { View, Text, Image, Alert, ToastAndroid, Platform, FlatList, ScrollView, Modal, RefreshControl } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { assignTaskToMember, config, createTask, databases } from '../../lib/appwrite'
@@ -8,18 +8,17 @@ import { router, useNavigation } from 'expo-router'
 import { useAppwrite } from '../../context/AppwriteClient'
 import { useTask } from '../../context/TaskContext'
 import { useRoute } from '@react-navigation/native'
-import PopUpMenu from '../../components/PopUpMenu'
 import * as Progress from 'react-native-progress';
 import * as Clipboard from 'expo-clipboard';
 import CustomButton from '../../components/CustomButton'
-import OverviewCard from '../../components/OverviewCard'
-import MemberContainer from '../../components/MemberContainer';
+import OverviewCard from '../../components/OverviewCard';
 import CustomInput from '../../components/CustomInput'
 import { useGlobalContext } from '../../context/GlobalProvider'
 import { ID, Query } from 'react-native-appwrite'
 import EmptyContent from '../../components/EmptyContent'
 import SubmitForm from '../../components/SubmitForm'
 import PopUpRemove from '../../components/PopUpRemove'
+import AssignMemberContainer from '../../components/AssignMemberContainer';
 
 
 const overview = () => {
@@ -39,6 +38,11 @@ const overview = () => {
   const [selectedMember, setSelectedMember] = useState(null);
   const [isSubmit, setIsSubmit] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const [groupAssignedTaskData, setGroupAssignedTaskData] = useState(null);
+
+
 
 
 //Fetch Task
@@ -184,8 +188,8 @@ const copyToClipboard = () => {
     setAssignTask(true)
   };
 
-  const openSubmitContainer = (assignedTask) => {
-    setSelectedMember(assignedTask) // Set selected member
+  const openSubmitContainer = (member) => {
+    setSelectedMember(member) // Set selected member
     setIsSubmit(true)
   };
 
@@ -210,6 +214,36 @@ const onTouchClose = () => {
 const OpenModal = () => {
   setOpenModal(true);
 }
+
+// Refresh Control function
+const onRefresh = async () => {
+  setRefreshing(true);
+  await Promise.all([fetchTask(), fetchAssignedTasks()]);
+  setRefreshing(false);
+};
+
+// Function to fetch groupAssignedCollection data
+const fetchGroupAssignedData = async () => {
+  if (!taskId) return;
+
+  try {
+    const response = await database.listDocuments(
+      config.databaseId,
+      config.groupAssignedTasksCollectionId, // Ensure this is the correct collection ID for groupAssignedCollection
+      [Query.equal("taskId", taskId)]
+    );
+    
+    // Assuming you want to store this data in state, add it here
+    setGroupAssignedTaskData(response.documents);
+    
+  } catch (error) {
+    console.error('Error fetching groupAssignedCollection data:', error);
+  }
+};
+
+useEffect(() => {
+  fetchGroupAssignedData();
+}, [taskId]);
 
   return (
     <SafeAreaView className='bg-white flex-col h-full relative'>
@@ -274,7 +308,12 @@ const OpenModal = () => {
 
       <View className={`p-2 items-center justify-center`}>
           {assignedTasks.length > 0 ? (
-            <ScrollView className='h-[50vh] overflow-scroll'>
+            <ScrollView 
+              className='h-[50vh] overflow-scroll'
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
+              >
               {assignedTasks.map((assignedTask) => (
                     <OverviewCard
                       key={assignedTask?.$id}
@@ -282,7 +321,8 @@ const OpenModal = () => {
                       username={assignedTask?.username}
                       userAvatar={{ uri: assignedTask?.avatar }} // Set avatar if available
                       status={assignedTask?.status}
-                      onPress={openSubmitContainer}
+                      onPress={() => openSubmitContainer(assignedTask)}
+                      onHide={assignedTask.memberId === user?.$id || assignedTask.assignedBy === user?.$id ? '' : 'hidden'}
                     />
                   ))}
             </ScrollView>
@@ -309,8 +349,8 @@ const OpenModal = () => {
           
 
             <View className="w-[95%] p-5 bg-white rounded-lg min-h-[85vh]">
-              <View className='flex-row items-center justify-between pb-2 border-b border-b-gray-300'>
-                <Text className="text-lg font-psemibold">Your Work</Text>
+              <View className='flex-row items-center justify-between pb-2 '>
+                <Text className="text-base font-psemibold">{isCreator ? `${selectedMember.username}'s Work` : `Your Work`}</Text>
                 <TouchableOpacity onPress={isSubmitClose} className="">
                   <Image 
                     source={icons.close}
@@ -323,11 +363,14 @@ const OpenModal = () => {
 
               <View className='relative'>
                 <SubmitForm 
-                  assignedTaskId={assignedTasks?.$id}
+                  key={selectedMember.id}
+                  assignedTaskId={selectedMember.$id}
                   isCreator={isCreator}
                   taskId={taskId}
                   refreshTaskDetails={refreshTaskDetails}
-                  memberId={selectedMember?.memberId}
+                  memberId={selectedMember.memberId}
+                  currentUser={user?.$id}
+                  username={selectedMember.username}
                 />
               </View>
 
@@ -367,7 +410,7 @@ const OpenModal = () => {
 
                     {members.length > 0 ? (
                         members.map((member, index) => (
-                        <MemberContainer 
+                        <AssignMemberContainer 
                               key={`${member.id}-${index}`} 
                               username={member.username}
                               userAvatar={member.avatar}

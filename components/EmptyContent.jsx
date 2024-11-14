@@ -2,11 +2,11 @@ import { View, Text, Image } from 'react-native'
 import React from 'react'
 import { images } from '../constants'
 
-const EmptyContent = ({ image, description, textContainer }) => {
+const EmptyContent = ({ image, description, textContainer, containerStyle }) => {
   return (
     <View className='items-center justify-center'>
-              <View className='p-3'>
-                <View className='p-7 rounded-full bg-secondary-200/60'>
+              <View className='p-1'>
+                <View className={`p-7 rounded-full bg-secondary-200/60 ${containerStyle}`}>
                   <Image 
                     source={image}
                     className='w-20 h-20'

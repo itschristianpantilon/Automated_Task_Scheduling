@@ -22,7 +22,13 @@ const join = () => {
             Alert.alert('Request Sent', 'Please wait for the task creator to accept your request.');
             navigation.goBack();
         } catch (error) {
+         // Alert user based on the error message
+         if (error.message === 'You already have a pending or accepted request for this task.') {
+            Alert.alert('Request Already Sent', 'You already have a pending or accepted request for this task.');
+            navigation.goBack();
+        } else {
             Alert.alert('Error', 'Failed to send join request.');
+        }
         }
     };
     

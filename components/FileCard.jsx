@@ -55,9 +55,9 @@ const FileCard = ({ fileName, fileUri, onDelete }) => {
   };
 
   return (
-    <View className="flex-row items-center justify-between py-2 px-3 border border-gray-400/90 rounded-sm">
+    <View className="flex-row items-center justify-between py-1 px-3 border border-gray-400/90 rounded-sm">
         <View className='flex-row items-center justify-center'>
-            <View className='w-12 h-12 mr-2'>
+            <View className='w-9 h-9 mr-2'>
                 {/* {isImage ? (
                   <Image 
                   source={{ uri: fileUri }} 
@@ -69,7 +69,7 @@ const FileCard = ({ fileName, fileUri, onDelete }) => {
                  {getFileIcon()}
             </View>
             <View className='w-40'>
-                <Text className='text-sm font-pregular'>{fileName}</Text>
+                <Text className='text-[9px] font-pregular'>{fileName}</Text>
             </View>
         </View>
 

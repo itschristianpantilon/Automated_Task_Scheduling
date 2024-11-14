@@ -7,10 +7,12 @@ import CommentCard from './CommentCard';
 import { uploadFile, addComment, updateAssignedTaskStatus, config, storage, getCurrentUser, getComments } from '../lib/appwrite';
 import { ID } from 'react-native-appwrite';
 import * as DocumentPicker from 'expo-document-picker';
+import EmptySubmitComponent from './EmptySubmitComponent';
+import { icons } from '../constants';
 
 
 
-const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, currentUser, memberId  }) => {
+const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, currentUser, memberId, username  }) => {
     const [isMember, setIsMember] = useState(true);
     const [inputComment, setInputComment] = useState(false);
     const [showInputComment, setShowInputComment] = useState(true);
@@ -18,22 +20,28 @@ const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, cur
     const [file, setFile] = useState(null);
     const [comments, setComments] = useState([]);
 
-    console.log("MemberId:",memberId)
-    console.log("Assigned TaskId:", assignedTaskId)
-    console.log("TaskId:", taskId)
+    // console.log("MemberId:",memberId)
+    // console.log("Assigned TaskId:", assignedTaskId)
+    // console.log("TaskId:", taskId)
+    // console.log('Current User: ', currentUser)
+
+    
 
     const fetchComments = async () => {
         try {
-            const fetchedComments = await getComments(taskId) // Assuming getComments is a function in lib/appwrite that retrieves comments for a task
-            setComments(fetchedComments)
+            const fetchedComments = await getComments(assignedTaskId);
+            //console.log("Fetched Comments:", fetchedComments); // Check if the comments are being fetched correctly
+            setComments(fetchedComments); // Store the comments into state
         } catch (error) {
-            console.error('Error fetching comments:', error)
+            console.error('Error fetching comments:', error);
         }
     }
-
+    
     useEffect(() => {
-        fetchComments()
-    }, [taskId, assignedTaskId])
+        fetchComments(); // Trigger fetch when taskId or assignedTaskId changes
+    }, [assignedTaskId]);
+    
+    
 
     const handleSelectFile = async () => {
         try {
@@ -72,14 +80,30 @@ const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, cur
     //       }
     // };
 
+    // const handleUploadFile = async () => {
+    //     if (!file) {
+    //       Alert.alert("Error", "No file selected. Please select a file to upload.");
+    //       return;
+    //     }
+    //     try {
+    //       const uploadedFile = await storage.createFile(config.storageId, ID.unique(), file);
+    //       console.log('File uploaded successfully:', uploadedFile);
+    //     } catch (error) {
+    //       console.error('Detailed file upload error:', error);
+    //       Alert.alert('File upload error', error.message || 'An unknown error occurred');
+    //     }
+    //   };
+
     const handleUploadFile = async () => {
         if (!file) {
           Alert.alert("Error", "No file selected. Please select a file to upload.");
           return;
         }
         try {
-          const uploadedFile = await storage.createFile(config.storageId, ID.unique(), file);
-          console.log('File uploaded successfully:', uploadedFile);
+          const uploaded = await uploadFile(file, memberId);
+          setFile(uploaded);
+          console.log('File Uploaded', uploaded);
+          
         } catch (error) {
           console.error('Detailed file upload error:', error);
           Alert.alert('File upload error', error.message || 'An unknown error occurred');
@@ -88,25 +112,36 @@ const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, cur
       
       const canAddComment = isCreator || isMember;
 
-      const handleAddComment = async () => {
+    const handleAddComment = async () => {
         if (!comment || !canAddComment) return;
-
+    
         try {
             const res = await getCurrentUser();
-            const newComment = {
-                id: ID.unique(),
-                username: res.username,
-                commentText: comment,
-                avatar: res.avatar,
-                memberId: memberId,
-            };
-
-            if (!taskId || !res.$id) {
-                throw new Error("User or Task information is missing?");
+    
+            // Add detailed logging for debugging
+            console.log("Current values in handleAddComment:");
+            console.log("taskId:", taskId);
+            console.log("memberId:", memberId);
+            console.log("res.$id (userId):", res?.$id);
+            console.log("comment:", comment);
+    
+            // Check for missing values
+            if (!taskId) {
+                console.error("Error: taskId is missing");
+                throw new Error("Task ID is missing");
+            }
+            if (!res?.$id) {
+                console.error("Error: User ID (res.$id) is missing");
+                throw new Error("User ID is missing");
+            }
+            if (!memberId) {
+                console.error("Error: memberId is missing");
+                throw new Error("Member ID is missing");
             }
     
-            await addComment(taskId, res.$id, res.username, comment, res.avatar, memberId);
-            
+            // Proceed to add the comment
+            await addComment(taskId, res.$id, res.username, comment, res.avatar, memberId, assignedTaskId);
+    
             // Update comments array with the new comment
             setComments((prev) => [
                 ...prev,
@@ -117,14 +152,15 @@ const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, cur
                     avatar: res.avatar,
                 },
             ]);
-
+    
             setComment('');
-            setShowInputComment(true);
+            setShowInputComment(false);
             refreshTaskDetails();
         } catch (error) {
             console.error('Error adding comment:', error);
         }
     };
+    
 
     const showCommentInputBTN = () => {
         setInputComment(true);
@@ -133,35 +169,45 @@ const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, cur
 
   return (
     <View className='relative min-h-[78vh]'>
-      <View>
-        <Text>Attachment</Text>
-        <View className='border h-[20vh] w-full p-2'>
+      <View className='border-y-[1px] h-[20vh] border-y-black-100/30 w-full p-2'>
+        <Text className='text-sm font-pregular'>{!file ? '' : 'Attachment'}</Text>
+        <View className='py-1'>
                 <ScrollView>
                 {file ? (
                     <FileCard fileName={file.name} fileUri={file.uri} onDelete={() => setFile(null)} />
                 ) : (
-                    <Text>You have no attachment uploaded.</Text>
+                    <View className='items-center justify-center h-[12vh]'>
+                        <EmptySubmitComponent 
+                            icon={icons.noAttachment}
+                            text={isCreator ? `${username} have no attachment uploaded.`: 'You have no attachment uploaded.'}
+                        />
+                    </View>
                 )}
     
                 </ScrollView>
         </View>
       </View>
 
-      <View>
-        <Text>Private Comments</Text>
-            <View className='border h-[15vh] w-full'>
-                    <ScrollView>
-                    {comments.length > 0 ? (
-                        comments.map((comment) => (
-                            <CommentCard 
-                                key={comment.$id} 
-                                username={comment?.username} 
-                                commentText={comment?.commentText || comment.comment} 
-                                userAvatar={comment?.avatar}
-                            />
-                        ))
+      <View className='border-y-[1px] border-y-black-100/30 h-[20vh] w-full px-1 py-2 mt-3'>
+        <Text className='text-sm font-pregular'>{comments.length === 0 ? '' : 'Private Comments'}</Text>
+            <View className='py-1'>
+                    <ScrollView className='h-[15vh]'>
+                        {comments.length > 0 ? (
+                            comments.map((comment) => (
+                                <CommentCard 
+                                    key={comment.id} 
+                                    username={comment?.username} 
+                                    commentText={comment?.commentText || comment.comment} 
+                                    userAvatar={comment?.avatar}
+                                />
+                            ))
                     ) : (
-                         <Text>No Comment</Text>
+                        <View className='items-center justify-center h-[15vh]'>
+                            <EmptySubmitComponent 
+                                icon={icons.commentSlash}
+                                text='No Comment'
+                            />
+                        </View>
                     )}
                     </ScrollView>
             </View>
@@ -180,14 +226,15 @@ const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, cur
             )}
 
         {inputComment && canAddComment && (
-            <View className='items-center mt-5'>
+            <View className='items-center mt-2'>
+                <Text className='w-full text-[12px] font-pregular'>Add Comment</Text>
                 <CustomInput 
-                    title='Add Comment'
                     value={comment}
                     placeholder=''
                     handleChangeText={setComment}
                     otherStyles='mb-2'
                     textStyle=''
+                    inputSyle='h-10'
                 />
                 <CustomButton 
                     title="Send Comment"

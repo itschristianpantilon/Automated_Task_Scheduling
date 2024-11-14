@@ -164,6 +164,7 @@ const solo = () => {
                       title={soloTask.title} 
                       duration={soloTask.duration}
                       deadline={soloTask.deadline}
+                      status={soloTask.status}
                     />
                   ))}
                 </ScrollView>

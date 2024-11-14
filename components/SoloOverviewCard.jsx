@@ -5,7 +5,7 @@ import { TouchableOpacity } from 'react-native';
 import { icons } from '../constants';
 import moment from 'moment';
 
-const SoloOverviewCard = ({ title, duration, deadline }) => {
+const SoloOverviewCard = ({ title, duration, deadline, status }) => {
     
   return (
     <View className='border border-gray-400/70 flex-row items-center justify-between p-4 rounded-md mb-3'>
@@ -16,13 +16,17 @@ const SoloOverviewCard = ({ title, duration, deadline }) => {
               <Text className='text-xs'>Deadline: {moment(deadline).format('YYYY-MM-DD')}</Text>
             </View>
         </View>
-        <TouchableOpacity className='border border-gray-400 p-1 rounded-full'>
-            <Image 
-                source={icons.complete}
-                className='w-7 h-7'
-                resizeMode='contain'
-            />
-        </TouchableOpacity>
+
+        <View className='items-center justify-center'>
+          <TouchableOpacity className='border border-gray-400 p-1 rounded-full'>
+              <Image 
+                  source={icons.complete}
+                  className='w-7 h-7'
+                  resizeMode='contain'
+              />
+          </TouchableOpacity>
+          <Text className='text-[10px] font-pregular mt-1'>{status}</Text>
+        </View>
     </View>
   )
 }

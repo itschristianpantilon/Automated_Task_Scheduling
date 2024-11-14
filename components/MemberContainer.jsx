@@ -7,7 +7,7 @@ import { useTask } from '../context/TaskContext';
 import { useAppwrite } from '../context/AppwriteClient';
 
 
-const MemberContainer = ({ username, userAvatar, icon, onPress, style, isCreator, isCurrentUserCreator }) => {
+const MemberContainer = ({ username, userAvatar, icon, onPress, style, isCreator, isCurrentUserCreator, LeaderOrMember, isHidden }) => {
 
     const { user } = useGlobalContext();
     const { taskId } = useTask(); // Get taskId from context
@@ -36,6 +36,8 @@ const MemberContainer = ({ username, userAvatar, icon, onPress, style, isCreator
   }, [taskId, user?.$id]);
 
 
+
+
   return (
     <View className="relative flex-row py-2 items-center justify-between border-b border-b-gray-100/40">
         <View className="flex-row items-center flex-1">
@@ -46,23 +48,15 @@ const MemberContainer = ({ username, userAvatar, icon, onPress, style, isCreator
                     resizeMode='contain'
                 />
             </View>
-            <Text className="text-base font-pregular ml-3">{username}</Text>
+            <View className='flex-col ml-3'>
+                <Text className="text-base font-pregular">{username}</Text>
+                <Text className="text-xs font-pregular">{LeaderOrMember}</Text>
+            </View>
         </View>
         
 
-            {/* <View className={`${isCreator ? 'hidden' : ''} items-center justify-center`}>
-                <TouchableOpacity onPress={onPress} className={`${style}`}>
-                    <Image 
-                        source={icon}
-                        className='w-7 h-7'
-                        resizeMode='contain'
-                    />
-                    
-                </TouchableOpacity>
-            </View> */}
-
                 {isCurrentUserCreator && !isCreator  ? (
-                    <View className={`items-center justify-center`}>
+                    <View className={`items-center justify-center ${isHidden}`}>
                         <TouchableOpacity onPress={onPress} className={`${style}`}>
                             <Image 
                                 source={icon}
