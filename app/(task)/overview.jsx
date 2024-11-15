@@ -371,6 +371,7 @@ useEffect(() => {
                   memberId={selectedMember.memberId}
                   currentUser={user?.$id}
                   username={selectedMember.username}
+                  status={selectedMember.status}
                 />
               </View>
 

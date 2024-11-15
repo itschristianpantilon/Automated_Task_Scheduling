@@ -12,7 +12,7 @@ import { icons } from '../constants';
 
 
 
-const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, currentUser, memberId, username  }) => {
+const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, isSubmit , memberId, username, status  }) => {
     const [isMember, setIsMember] = useState(true);
     const [inputComment, setInputComment] = useState(false);
     const [showInputComment, setShowInputComment] = useState(true);
@@ -66,44 +66,21 @@ const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, cur
         }
     };
 
-    // const handleUploadFile = async () => {
-    //     if (!file) {
-    //         Alert.alert("Error", "No file selected. Please select a file to upload.");
-    //         return;
-    //     }
-    //     try {
-    //         const uploadedFile = await storage.createFile(config.storageId, ID.unique(), file);
-    //         console.log('File uploaded successfully:', uploadedFile);
-    //       } catch (error) {
-    //         console.error('Detailed file upload error:', error);
-    //         Alert.alert('File upload error', error.message || 'An unknown error occurred');
-    //       }
-    // };
 
-    // const handleUploadFile = async () => {
-    //     if (!file) {
-    //       Alert.alert("Error", "No file selected. Please select a file to upload.");
-    //       return;
-    //     }
-    //     try {
-    //       const uploadedFile = await storage.createFile(config.storageId, ID.unique(), file);
-    //       console.log('File uploaded successfully:', uploadedFile);
-    //     } catch (error) {
-    //       console.error('Detailed file upload error:', error);
-    //       Alert.alert('File upload error', error.message || 'An unknown error occurred');
-    //     }
-    //   };
 
     const handleUploadFile = async () => {
         if (!file) {
           Alert.alert("Error", "No file selected. Please select a file to upload.");
           return;
         }
+        updateAssignedTaskStatus(assignedTaskId, 'Verifying');
+          console.log(assignedTaskId)
         try {
           const uploaded = await uploadFile(file, memberId);
           setFile(uploaded);
           console.log('File Uploaded', uploaded);
           
+
         } catch (error) {
           console.error('Detailed file upload error:', error);
           Alert.alert('File upload error', error.message || 'An unknown error occurred');
@@ -193,9 +170,9 @@ const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, cur
             <View className='py-1'>
                     <ScrollView className='h-[15vh]'>
                         {comments.length > 0 ? (
-                            comments.map((comment) => (
+                            comments.map((comment, index) => (
                                 <CommentCard 
-                                    key={comment.id} 
+                                    key={`${comment.id} - ${index}`} 
                                     username={comment?.username} 
                                     commentText={comment?.commentText || comment.comment} 
                                     userAvatar={comment?.avatar}
@@ -248,7 +225,7 @@ const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, cur
     )}
 
     {isMember && (
-        <View className={`absolute w-full p-2 bottom-0`}>
+        <View className={`absolute w-full p-2 bottom-0 ${isCreator ? 'hidden' : ''}`}>
 
             <CustomButton 
                 title="Upload Attachment"
@@ -277,10 +254,11 @@ const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, cur
             <CustomButton 
                 title="Accept"
                 textStyles="text-base text-white font-psemibold"
-                containerStyles="min-h-[40px] rounded-md border border-gray-400/70 mb-2"
-                handlePress={() => updateAssignedTaskStatus(assignedTaskId, 'Completed')}
+                containerStyles={`min-h-[40px] rounded-md border border-gray-400/70 mb-2 ${status === 'Rejected' || status === 'Accepted' ? 'opacity-60' : ''}`}
+                handlePress={() => updateAssignedTaskStatus(assignedTaskId, 'Accepted')}
                 icon={() => {}}
                 iconStyle=""
+                isLoading={status === 'Rejected' || status === 'Accepted'}
             />
 
 
@@ -291,6 +269,7 @@ const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, cur
                 handlePress={() => updateAssignedTaskStatus(assignedTaskId, 'Rejected')}
                 icon={() => {}}
                 iconStyle=""
+                isLoading={status === 'Rejected' || status === 'Accepted'}
             />
         </View>
     )}

@@ -15,6 +15,8 @@ import SoloOverviewCard from '../components/SoloOverviewCard'
 import { Query } from 'react-native-appwrite'
 import EmptyContent from '../components/EmptyContent'
 import moment from 'moment/moment'
+import { getCurrentUser } from '../lib/appwrite'
+import PopUpRemove from '../components/PopUpRemove'
 
 const solo = () => {
   const navigation = useNavigation();
@@ -26,7 +28,16 @@ const solo = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState(''); // State for new task title
   const [soloTasks, setSoloTasks] = useState([]); // State for list of solo tasks
+  const [openModal, setOpenModal] = useState(false);
 
+  const onTouchClose = () => {
+    setOpenModal(false);
+  }
+  
+  const OpenModal = () => {
+    setOpenModal(true);
+  }
+  
   useEffect(() => {
     const fetchTask = async () => {
       if (!taskId) return;
@@ -71,6 +82,9 @@ const solo = () => {
     try {
 
       // Calculate the solo task duration and deadline based on the main task
+
+      const currentUser = await getCurrentUser();
+
       const mainTaskDeadline = task?.deadline;
       const mainTaskDuration = task?.duration;
       let soloTaskDeadline = mainTaskDeadline;
@@ -90,6 +104,7 @@ const solo = () => {
         title: newTaskTitle,
         taskId: taskId, // Link solo task to parent taskId
         status: 'Ongoing',
+        creator: currentUser.$id,
         deadline: soloTaskDeadline,
         duration: soloTaskDuration,
       };
@@ -111,11 +126,28 @@ const solo = () => {
     }
   };
 
+   // Function to update the status of a solo task to "Finished"
+   const updateSoloTaskStatus = async (soloTaskId) => {
+    try {
+      const response = await database.updateDocument(
+        '670e0a0e002e9b302a34',
+        '6729e342001e7f976939', // Collection ID for solo tasks
+        soloTaskId,
+        { status: 'Finished' } // Update the status to "Finished"
+      );
 
+      // Update the local state to reflect the change
+      setSoloTasks(soloTasks.map(task => 
+        task.$id === soloTaskId ? { ...task, status: 'Finished' } : task
+      ));
+    } catch (error) {
+      console.error('Error updating solo task status:', error);
+    }
+  };
 
   return (
     <SafeAreaView className='bg-white flex-col h-full relative'>
-      <View className="pl-4 flex-row items-center justify-between">
+      <View className="px-4 flex-row items-center justify-between">
                 <TouchableOpacity className='' onPress={() => { router.replace('/Home')}}>
                     <Image 
                         source={icons.back}
@@ -123,7 +155,13 @@ const solo = () => {
                         resizeMode='contain'
                     />
                 </TouchableOpacity>
-                <PopUpMenu icon={images.threeDot} otherStyles="w-5 h-5 mr-4" />
+                <TouchableOpacity onPress={OpenModal}>
+                  <Image
+                    source={images.threeDot}
+                    className='w-5 h-5'
+                    resizeMode='contain'
+                  />
+                </TouchableOpacity>
       </View>
       <View className="p-4 flex-col">
         <Text className="text-lg font-plight capitalize">{task?.type || taskType} Task</Text>
@@ -165,6 +203,8 @@ const solo = () => {
                       duration={soloTask.duration}
                       deadline={soloTask.deadline}
                       status={soloTask.status}
+                      onPress={() => updateSoloTaskStatus(soloTask.$id)}
+                      disabled={soloTask.status === 'Finished'}
                     />
                   ))}
                 </ScrollView>
@@ -249,6 +289,14 @@ const solo = () => {
             iconStyle=""
         />
       </View>
+
+      {openModal && (
+          <PopUpRemove 
+            onPress={openModal}
+            setOnpress={setOpenModal}
+            onTouchClose={onTouchClose}
+          />
+      )}
     </SafeAreaView>
   )
 }

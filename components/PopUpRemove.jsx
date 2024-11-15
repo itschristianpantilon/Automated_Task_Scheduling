@@ -6,6 +6,7 @@ import { useTask } from '../context/TaskContext';
 import { useAppwrite } from '../context/AppwriteClient';
 import { useGlobalContext } from '../context/GlobalProvider';
 import CustomButton from './CustomButton';
+import { updateTaskStatus } from '../lib/appwrite';
 
 const PopUpRemove = ({ onPress, setOnpress, onTouchClose }) => {
 
@@ -21,11 +22,11 @@ const PopUpRemove = ({ onPress, setOnpress, onTouchClose }) => {
     try {
       const response = await database.getDocument('670e0a0e002e9b302a34', '6711f75c00201eca940c', taskId);
       setTask(response);
-              
+            
       if (!isCreator && response.userId === user?.$id) {
         setIsCreator(true);
       }
-
+      console.log('Task Id: ', taskId)
     } catch (error) {
       console.error('Error fetching task:', error);
     }
@@ -73,7 +74,7 @@ const PopUpRemove = ({ onPress, setOnpress, onTouchClose }) => {
                       title="Mark as done"
                       textStyles="text-base text-white font-psemibold"
                       containerStyles="min-h-[45px] rounded-md"
-                      handlePress={() => {}}
+                      handlePress={() => updateTaskStatus(taskId, 'Finished')}
                       icon={() => {}}
                       iconStyle=""
                     />
@@ -95,7 +96,7 @@ const PopUpRemove = ({ onPress, setOnpress, onTouchClose }) => {
                         title="Remove"
                         textStyles="text-sm font-pregular"
                         containerStyles={`min-h-[40px] rounded-md w-[49%] border bg-white border-black/30`}
-                        handlePress={() => {}}
+                        handlePress={() => updateTaskStatus(taskId, "Inactive")}
                         icon={() => {}}
                         iconStyle=""
                       />

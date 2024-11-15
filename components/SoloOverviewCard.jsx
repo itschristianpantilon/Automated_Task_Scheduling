@@ -5,10 +5,10 @@ import { TouchableOpacity } from 'react-native';
 import { icons } from '../constants';
 import moment from 'moment';
 
-const SoloOverviewCard = ({ title, duration, deadline, status }) => {
+const SoloOverviewCard = ({ title, duration, deadline, status, onPress, disabled }) => {
     
   return (
-    <View className='border border-gray-400/70 flex-row items-center justify-between p-4 rounded-md mb-3'>
+    <View className={`border border-gray-400/70 flex-row items-center justify-between p-4 rounded-md mb-3 ${status === 'Finished' ? 'opacity-30' : ''}`}>
         <View className='flex-1'>
             <Text className='text-lg font-pmedium mb-1'>{title}</Text>
             <View className='flex-row items-center'>
@@ -18,7 +18,11 @@ const SoloOverviewCard = ({ title, duration, deadline, status }) => {
         </View>
 
         <View className='items-center justify-center'>
-          <TouchableOpacity className='border border-gray-400 p-1 rounded-full'>
+          <TouchableOpacity 
+            className='border border-gray-400 p-1 rounded-full' 
+            onPress={onPress}
+            disabled={disabled}
+            >
               <Image 
                   source={icons.complete}
                   className='w-7 h-7'

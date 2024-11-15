@@ -121,6 +121,8 @@ const Home = () => {
                 title={item?.title}
                 taskType={item?.type}
                 duration={item?.duration}
+                status={item?.status}
+                role={item?.userId}
                 threeDotBtn={() => {
                   OpenModal();
                   setTaskId(item?.$id);

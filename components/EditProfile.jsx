@@ -26,13 +26,40 @@ const EditProfile = ({ visible, onRequestClose, onPress }) => {
     }
   };
 
+  // const handleEditProfile = async () => {
+  //   try {
+  //     const updatedUser = await updateUserProfile(user.$id, newAvatar, username);
+  //     setUser(updatedUser);  // Update context with new user data
+  //     onRequestClose();      // Close the modal on success
+  //   } catch (error) {
+  //     console.error("Failed to update profile edit page:", error);
+  //   }
+  // };
+
   const handleEditProfile = async () => {
-    try {
-      const updatedUser = await updateUserProfile(user.$id, newAvatar, username);
-      setUser(updatedUser);  // Update context with new user data
-      onRequestClose();      // Close the modal on success
-    } catch (error) {
-      console.error("Failed to update profile edit page:", error);
+    if (newAvatar) {
+      try {
+        // Fetch the file from the URI and convert it to a blob
+        const response = await fetch(newAvatar);
+        const blob = await response.blob();
+  
+        // Create a file object from the blob
+        const file = new File([blob], 'profile-pic.jpg', { type: blob.type });
+  
+        // Upload to Appwrite storage
+        const updatedFile = await storage.createFile(
+          '670e0b190028e05762ea', // Storage bucket ID
+          ID.unique(),
+          file
+        );
+  
+        // Assuming you want to update the user's avatar URL
+        const updatedUser = { ...user, avatar: updatedFile.$id };
+        setUser(updatedUser); // Update context with new user data
+        onRequestClose();     // Close the modal on success
+      } catch (error) {
+        console.error("Failed to update profile:", error);
+      }
     }
   };
 
