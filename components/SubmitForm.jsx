@@ -5,7 +5,7 @@ import CustomInput from './CustomInput';
 import FileCard from './FileCard';
 import CommentCard from './CommentCard';
 import { uploadFile, addComment, updateAssignedTaskStatus, config, storage, getCurrentUser, getComments } from '../lib/appwrite';
-import { ID } from 'react-native-appwrite';
+import { ID, Permission, Role } from 'react-native-appwrite';
 import * as DocumentPicker from 'expo-document-picker';
 import EmptySubmitComponent from './EmptySubmitComponent';
 import { icons } from '../constants';
@@ -46,23 +46,21 @@ const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, isS
     const handleSelectFile = async () => {
         try {
             const result = await DocumentPicker.getDocumentAsync({});
-        
             if (result.type === 'cancel') {
-                // The user canceled the picker
                 console.log("Document picking was canceled");
                 return;
             }
-            const file = result.assets[0];  // Assuming there's only one file selected
-            if (file) {
-                setFile(file); // Set the file object with uri and name
-                console.log("File selected:", file);
-                console.log(file.uri);  // This should now log the correct file URI
-            }
+            const file = {
+                name: result.name,
+                type: result.mimeType || 'application/octet-stream',
+                size: result.size,
+                uri: result.uri,
+            };
+            setFile(file);
+            console.log("File selected:", file);
         } catch (err) {
-           
-                console.error("Error selecting file:", err);
-                Alert.alert("Error", "Failed to select a file");
-        
+            console.error("Error selecting file:", err);
+            Alert.alert("Error", "Failed to select a file");
         }
     };
 
@@ -70,22 +68,33 @@ const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, isS
 
     const handleUploadFile = async () => {
         if (!file) {
-          Alert.alert("Error", "No file selected. Please select a file to upload.");
-          return;
+            Alert.alert("Error", "No file selected. Please select a file to upload.");
+            return;
         }
-        updateAssignedTaskStatus(assignedTaskId, 'Verifying');
-          console.log(assignedTaskId)
-        try {
-          const uploaded = await uploadFile(file, memberId);
-          setFile(uploaded);
-          console.log('File Uploaded', uploaded);
-          
 
-        } catch (error) {
-          console.error('Detailed file upload error:', error);
-          Alert.alert('File upload error', error.message || 'An unknown error occurred');
+        if (!memberId) {
+            Alert.alert("Error", "User ID is missing. Cannot set upload permissions.");
+            return;
         }
-      };
+
+        try {
+            console.log("Uploading file:", file);
+
+            // Call Appwrite storage API to upload file
+            const response = await storage.createFile(
+                config.storageId,
+                ID.unique(),
+                file,
+            );
+
+            console.log("File uploaded successfully:", response);
+            setFile(null); // Reset file state after successful upload
+            Alert.alert("Success", "File uploaded successfully.");
+        } catch (error) {
+            console.error("Error uploading file:", error);
+            Alert.alert("Error", "Failed to upload file. Please try again.");
+        }
+    };
       
       const canAddComment = isCreator || isMember;
 

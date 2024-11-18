@@ -1,195 +1,76 @@
-import { View, Text, Modal, TouchableOpacity, Image, TextInput } from 'react-native'
+import { View, Text, Modal, TouchableOpacity, Image, TextInput, Alert } from 'react-native'
 import React, { useState } from 'react'
 import { icons } from '../constants'
 import { useGlobalContext } from '../context/GlobalProvider';
 import * as ImagePicker from 'expo-image-picker';
-import { config, databases, storage, updateUserProfile } from '../lib/appwrite';
+import { account, config, databases, storage, updateProfile, updateUsername, updateUserProfile } from '../lib/appwrite';
 import { ID } from 'react-native-appwrite';
 
 
 const EditProfile = ({ visible, onRequestClose, onPress }) => {
   const { user, setUser, setIsLoggedIn } = useGlobalContext();
   const [username, setUsername] = useState(user?.username);
-  const [avatar, setAvatar] = useState(user?.avatar);
-  const [newAvatar, setNewAvatar] = useState(null);
+  //const [newAvatar, setNewAvatar] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [form, setForm] = useState({
+    image: user?.avatar
+  });
+  const [avatar, setAvatar] = useState(form.image);
 
-  const handleImagePick = async () => {
+  const handleImagePick = async (selectType) => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: selectType === 'image' ? ImagePicker.MediaTypeOptions.Images : ImagePicker.MediaTypeOptions.Videos,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
     });
 
-    if (result.assets && result.assets.length > 0) {
-      setNewAvatar(result.assets[0].uri); // Updated approach based on newer API
-    }
-  };
-
-  // const handleEditProfile = async () => {
-  //   try {
-  //     const updatedUser = await updateUserProfile(user.$id, newAvatar, username);
-  //     setUser(updatedUser);  // Update context with new user data
-  //     onRequestClose();      // Close the modal on success
-  //   } catch (error) {
-  //     console.error("Failed to update profile edit page:", error);
-  //   }
-  // };
-
-  const handleEditProfile = async () => {
-    if (newAvatar) {
-      try {
-        // Fetch the file from the URI and convert it to a blob
-        const response = await fetch(newAvatar);
-        const blob = await response.blob();
-  
-        // Create a file object from the blob
-        const file = new File([blob], 'profile-pic.jpg', { type: blob.type });
-  
-        // Upload to Appwrite storage
-        const updatedFile = await storage.createFile(
-          '670e0b190028e05762ea', // Storage bucket ID
-          ID.unique(),
-          file
-        );
-  
-        // Assuming you want to update the user's avatar URL
-        const updatedUser = { ...user, avatar: updatedFile.$id };
-        setUser(updatedUser); // Update context with new user data
-        onRequestClose();     // Close the modal on success
-      } catch (error) {
-        console.error("Failed to update profile:", error);
+    if(!result.canceled){
+      if(selectType === 'image'){
+        setForm({form, image: result.assets[0]})
       }
     }
-  };
+
+    // if (result.assets && result.assets.length > 0) {
+    //   setNewAvatar(result.assets[0].uri); // Updated approach based on newer API
+    // }
+ };
+ //const userId = user?.$id;
+
+  const submit = async () => {
+
+    setUploading(true)
+    try {
 
 
-  // const handleEditProfile = async () => {
-  //   try {
-  //     let avatarUrl = avatar;
+      const updatedUser = await updateProfile(form, user?.$id, username );
+      setUser(updatedUser);
+      
+      Alert.alert('Success', 'Profile Updated Successfully')
 
-  //     if (newAvatar) {
-  //       // Upload new avatar to Appwrite storage
-  //       const file = await storage.createFile(
-  //         config.storageId,
-  //         ID.unique(),
-  //         newAvatar
-  //       );
+    } catch (error) {
+      console.error('Error Edit Profile', error.message)
+    }
+    setUploading(false)
+  }
 
-  //       avatarUrl = file.$id;  // Assuming you get the file ID for retrieval
-  //     }
+//   const submit = async () => {
+//     setUploading(true);
+//     try {
+//         console.log("Submitting form:", form);
 
-  //     // Update user info in the database
-  //     const updatedUser = await databases.updateDocument(
-  //       config.databaseId,
-  //       config.userCollectionId,
-  //       user.$id,  // User's document ID
-  //       {
-  //         username,
-  //         avatar: avatarUrl
-  //       }
-  //     );
+//         // Call updateProfile with the current form data
+//         await updateProfile({...form});
 
-  //     setUser(updatedUser);
-  //     onRequestClose();
+//         Alert.alert("Success", "Profile Updated Successfully");
+//     } catch (error) {
+//         console.error("Error Edit Profile", error.message);
+//         Alert.alert("Error", error.message);
+//     } finally {
+//         setUploading(false);
+//     }
+// };
 
-  //   } catch (error) {
-  //     console.error("Failed to update profile:", error);
-  //   }
-  // };
-
-  // const handleEditProfile = async () => {
-  //   try {
-  //     let avatarUrl = avatar;
-
-  //     if (newAvatar) {
-  //       const response = await fetch(newAvatar);
-  //       const blob = await response.blob();
-
-  //       const fileId = ID.unique();
-  //       console.log("Starting file upload with ID:", fileId);
-
-  //       // Use FormData for Appwrite compatibility
-  //       const formData = new FormData();
-  //       formData.append("file", {
-  //         uri: newAvatar,
-  //         name: `avatar_${fileId}.jpg`,
-  //         type: "image/jpeg",
-  //       });
-
-  //       const file = await storage.createFile(
-  //         config.storageId,
-  //         fileId,
-  //         formData
-  //       );
-
-  //       avatarUrl = storage.getFileView(config.storageId, file.$id).href;
-  //       console.log("File uploaded successfully:", avatarUrl);
-  //     }
-
-  //     const updatedUser = await databases.updateDocument(
-  //       config.databaseId,
-  //       config.userCollectionId,
-  //       user.$id,
-  //       { username, avatar: avatarUrl }
-  //     );
-
-  //     console.log("Profile updated successfully:", updatedUser);
-  //     setUser(updatedUser);
-  //     onRequestClose();
-
-  //   } catch (error) {
-  //     console.error("Failed to update profile:", error);
-  //   }
-  // };
-
-
-  // const handleEditProfile = async () => {
-  //   try {
-  //     let avatarUrl = avatar;
-  
-  //     if (newAvatar) {
-  //       console.log("New avatar selected, uploading...");
-  
-  //       // Fetch the image and create a Blob for upload
-  //       const response = await fetch(newAvatar);
-  //       const blob = await response.blob();
-  
-  //       const fileId = ID.unique();
-  
-  //       // Upload to Appwrite with permissions for the current user
-  //       const file = await storage.createFile(
-  //         config.storageId,
-  //         fileId,
-  //         blob,
-  //         ["*"] // Change to specific user permissions as needed
-  //       );
-  
-  //       // Attempt to retrieve the file's direct URL
-  //       avatarUrl = storage.getFileView(config.storageId, file.$id).href;
-  //       console.log("Avatar uploaded successfully with URL:", avatarUrl);
-  
-  //       // You can log and test avatarUrl here directly in the browser to confirm access
-  //     }
-  
-  //     // Update user profile in the database
-  //     const updatedUser = await databases.updateDocument(
-  //       config.databaseId,
-  //       config.userCollectionId,
-  //       user.$id,
-  //       { username, avatar: avatarUrl }
-  //     );
-  
-  //     console.log("User profile updated with new avatar:", updatedUser.avatar);
-  //     setUser(updatedUser); // Update the user state to trigger a re-render
-  
-  //     // Close modal on success
-  //     onRequestClose();
-  //   } catch (error) {
-  //     console.error("Failed to update profile or avatar:", error);
-  //   }
-  // };
-  
 
   return (
     <Modal
@@ -208,12 +89,13 @@ const EditProfile = ({ visible, onRequestClose, onPress }) => {
                 />
               </TouchableOpacity>
               <Text className="font-psemibold text-xl">Edit Profile</Text>
-              <TouchableOpacity onPress={handleEditProfile}>
+              <TouchableOpacity onPress={submit}>
                 <Image 
                   source={icons.complete}
                   className='w-7 h-7'
                   resizeMode='contain'
                 />
+                
               </TouchableOpacity>
             </View>
 
@@ -222,15 +104,23 @@ const EditProfile = ({ visible, onRequestClose, onPress }) => {
                 <View className='flex-row items-center justify-center w-full relative'>
 
                   <View>
-                    <View className="w-24 h-24 rounded-full bg-white border-[4px] border-white">
+                    <View className="w-24 h-24 rounded-full bg-white border-[4px] border-white relative">
                       <Image 
-                        source={{ uri: newAvatar || avatar }}
+                        source={{ uri: form.image }}
                         className="w-full h-full rounded-full"
                         resizeMode='contain'
+                        
+                      />
+
+                      <Image 
+                        source={{ uri: form.image.uri }}
+                        className="w-full h-full rounded-full absolute"
+                        resizeMode='contain'
+                        
                       />
                     </View>
 
-                      <TouchableOpacity className='bg-gray-200 w-8 h-8 rounded-full border-[3px] border-white items-center justify-center absolute bottom-0 right-0' onPress={handleImagePick}>
+                      <TouchableOpacity className='bg-gray-200 w-8 h-8 rounded-full border-[3px] border-white items-center justify-center absolute bottom-0 right-0' onPress={() => handleImagePick('image')}>
                         <Image 
                           source={icons.plus}
                           className='w-full h-full rounded-full'

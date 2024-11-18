@@ -12,7 +12,7 @@ const PopUpMenu = ({title, icon, otherStyles }) => {
     const scale = useRef(new Animated.Value(0)).current;
     const options = [
         {
-            title: "Create Task",
+            title: "Create Room",
             links: () => router.push('/create')
         },
         {

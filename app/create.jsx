@@ -75,7 +75,7 @@ const create = () => {
                         resizeMode='contain'
                     />
                 </TouchableOpacity>
-                <Text className="font-pmedium text-lg">Create Task</Text>
+                <Text className="font-pmedium text-lg">Create a Room</Text>
             </View>
             <CustomButton 
                 title="Create"
@@ -90,14 +90,14 @@ const create = () => {
             <View>
 
                 <CustomInput 
-                    title="Task Name"
+                    title="Room Name"
                     value={title}
                     placeholder=""
                     handleChangeText={setTitle}
                     otherStyles=""
                 />
 
-            <Text className="text-base text-gray-500 font-pmedium mt-2">Select Task Type</Text>
+            <Text className="text-base text-gray-500 font-pmedium mt-2">Select Room Type</Text>
 
                     <View className="bg-zinc-50 border border-gray-300 rounded-md">
                         <Picker
