@@ -27,6 +27,8 @@ import editPencil from '../assets/icons/editPencil.png';
 import commentSlash from '../assets/icons/commentSlash.png';
 import noAttachment from '../assets/icons/noAttachment.png';
 import noPending from '../assets/icons/noPending.png';
+import download from '../assets/icons/download.png';
+import progress from '../assets/icons/progress.png';
 
 export default {
   home,
@@ -56,5 +58,7 @@ export default {
   editPencil,
   commentSlash,
   noAttachment,
-  noPending
+  noPending,
+  download,
+  progress
 };

@@ -11,26 +11,58 @@ import { useTask } from '../../context/TaskContext'
 import { Query } from 'react-native-appwrite'
 import EmptyContent from '../../components/EmptyContent'
 import PopUpRemove from '../../components/PopUpRemove'
+import { databases } from '../../lib/appwrite'
 
 
 
 const Home = () => {
   
-  const {user, setUser, setIsLoggedIn} = useGlobalContext();
+  const { user } = useGlobalContext();
   const navigation = useNavigation();
 
   const [tasks, setTasks] = useState([]);
   const { database } = useAppwrite();
 
-  const { setTaskId } = useTask();
+  const { taskId, setTaskId } = useTask();
 
   const [openModal, setOpenModal] = useState(false);
 
   const [refreshing, setRefreshing] = useState(false);
 
   
+  const handleRemoveMember = async (memberId) => {
+    try {
+        
+        const task = await databases.getDocument(config.databaseId, config.taskCollectionId, taskId);
 
+      
+        if (task.members && Array.isArray(task.members)) {
+          
+            const updatedMembers = task.members.filter((member) => member !== memberId);
+            
+          
+            if (updatedMembers.length !== task.members.length) {
+              
+                await databases.updateDocument(config.databaseId, config.taskCollectionId, taskId, {
+                    members: updatedMembers, 
+                });
 
+                
+                setMembers((prevMembers) => prevMembers.filter((member) => member.$id !== memberId));
+
+                Alert.alert('Removed', 'The member has been removed from the task.');
+            } else {
+                Alert.alert('Error', 'Member not found in the task.');
+            }
+        } else {
+            console.error('Invalid members array structure in task document');
+            Alert.alert('Error', 'Failed to retrieve members for the task.');
+        }
+    } catch (error) {
+        console.error('Failed to remove member:', error);
+        Alert.alert('Error', 'Failed to remove member.');
+    }
+};
 
   const onTouchClose = () => {
     setOpenModal(false);
@@ -162,6 +194,7 @@ const Home = () => {
             onPress={openModal}
             setOnpress={setOpenModal}
             onTouchClose={onTouchClose}
+            leave={() => handleRemoveMember(memberId)}
           />
       )}
     </SafeAreaView>

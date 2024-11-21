@@ -129,22 +129,22 @@ const members = () => {
   
 const handleAcceptRequest = async (requestId, requesterId) => {
   try {
-      // Fetch the join request to get additional user details like username and avatar
+      
       const joinRequest = await databases.getDocument(config.databaseId, config.joinRequestCollectionId, requestId);
 
-      // Extract username and avatar and validate they exist
+      
       const { username, avatar } = joinRequest;
       if (!username || !avatar) {
           throw new Error('Join request is missing required fields: username or avatar.');
       }
 
-      // Accept the join request, adding the member to the task
+      
       const updatedMembers = await acceptJoinRequest(requestId, taskId, requesterId, username, avatar);
       
-      // Show success alert and update members state to reflect new member
+      
       Alert.alert('Accepted', 'Member added successfully.');
       setPendingRequests((prevRequests) => prevRequests.filter((req) => req.$id !== requestId));
-      setMembers(updatedMembers); // Ensure `updatedMembers` is the updated array of members
+      setMembers(updatedMembers); 
   } catch (error) {
       console.error('Failed to accept request:', error);
       Alert.alert('Error', 'Failed to accept join request.');
@@ -155,7 +155,7 @@ const handleRejectRequest = async (requestId) => {
     try {
         await rejectJoinRequest(requestId);
         
-        // Update pending requests state to remove the rejected request
+        
         setPendingRequests((prevRequests) => prevRequests.filter((req) => req.$id !== requestId));
 
         Alert.alert('Rejected', 'The join request has been rejected.');
@@ -200,7 +200,7 @@ const handleRemoveMember = async (memberId) => {
 };
 
 
-// Refresh function to reload data
+
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         await fetchTask();

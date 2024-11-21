@@ -1,4 +1,4 @@
-import { View, Text, Modal, Animated, Easing } from 'react-native'
+import { View, Text, Modal, Animated, Easing, Alert } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
@@ -6,15 +6,16 @@ import { useTask } from '../context/TaskContext';
 import { useAppwrite } from '../context/AppwriteClient';
 import { useGlobalContext } from '../context/GlobalProvider';
 import CustomButton from './CustomButton';
-import { updateTaskStatus } from '../lib/appwrite';
+import { config, databases, updateTaskStatus } from '../lib/appwrite';
 
-const PopUpRemove = ({ onPress, setOnpress, onTouchClose }) => {
+const PopUpRemove = ({ onPress, setOnpress, onTouchClose, leave }) => {
 
   const { user } = useGlobalContext();
   const { taskId } = useTask(); // Get taskId from context
   const [task, setTask] = useState(null);
   const { database } = useAppwrite();
   const [isCreator, setIsCreator] = useState(false);
+  const [members, setMembers] = useState([]);
 
   const fetchTask = async () => {
     if (!taskId) return;
@@ -27,6 +28,7 @@ const PopUpRemove = ({ onPress, setOnpress, onTouchClose }) => {
         setIsCreator(true);
       }
       console.log('Task Id: ', taskId)
+      console.log('MemberID', task?.$id)
     } catch (error) {
       console.error('Error fetching task:', error);
     }
@@ -48,6 +50,39 @@ const PopUpRemove = ({ onPress, setOnpress, onTouchClose }) => {
     }).start(() => to === 0 && setOnpress(false))
 }
 
+const leaveTask = async () => {
+  if (!taskId || !user?.$id) return;
+
+  try {
+    // Fetch the task from the database
+    const task = await databases.getDocument(config.databaseId, config.taskCollectionId, taskId);
+    
+    // Make sure the current user is not the creator (they cannot leave)
+    if (task.userId === user.$id) {
+      Alert.alert('Error', 'The creator cannot leave the task.');
+      return;
+    }
+
+    // Remove the current user's ID from the task's members list
+    const updatedMembers = task.members.filter(memberId => memberId !== user.$id);
+
+    // Update the task document in the database
+    await databases.updateDocument(config.databaseId, config.taskCollectionId, taskId, {
+      members: updatedMembers,
+    });
+
+    // Remove the user from the local state as well
+    setMembers(prevMembers => prevMembers.filter(member => member.$id !== user.$id));
+
+    // Optionally, navigate back or show a success message
+    Alert.alert('Success', 'You have left the task.');
+    navigation.goBack();
+
+  } catch (error) {
+    console.error('Error leaving task:', error);
+    Alert.alert('Error', 'Failed to leave the task.');
+  }
+};
 
   return (
 
@@ -87,7 +122,7 @@ const PopUpRemove = ({ onPress, setOnpress, onTouchClose }) => {
                         title="Leave"
                         textStyles="text-sm font-pregular"
                         containerStyles={`${isCreator ? 'hidden' : '' } min-h-[40px] rounded-md w-[49%] border bg-white border-black/30`}
-                        handlePress={() => {}}
+                        handlePress={leaveTask}
                         icon={() => {}}
                         iconStyle=""
                       />

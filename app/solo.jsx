@@ -29,6 +29,18 @@ const solo = () => {
   const [newTaskTitle, setNewTaskTitle] = useState(''); // State for new task title
   const [soloTasks, setSoloTasks] = useState([]); // State for list of solo tasks
   const [openModal, setOpenModal] = useState(false);
+  const [progressPercentage, setProgressPercentage] = useState(0); // Track progress percentage
+
+  useEffect(() => {
+    if (soloTasks.length > 0) {
+      const completedTasks = soloTasks.filter(task => task.status === 'Finished').length;
+      const progress = (completedTasks / soloTasks.length) * 100; // Calculate percentage
+      setProgressPercentage(progress);
+    } else {
+      setProgressPercentage(0); // Reset progress if no tasks
+    }
+  }, [soloTasks]);
+
 
   const onTouchClose = () => {
     setOpenModal(false);
@@ -75,13 +87,13 @@ const solo = () => {
   }, [taskId]);
 
 
-  // Function to add a new solo task to "solotasklist" collection
+
   const addSoloTask = async () => {
     if (!newTaskTitle.trim()) return;
 
     try {
 
-      // Calculate the solo task duration and deadline based on the main task
+  
 
       const currentUser = await getCurrentUser();
 
@@ -91,13 +103,13 @@ const solo = () => {
       let soloTaskDuration = mainTaskDuration;
 
       if (mainTaskDeadline) {
-        // Set solo task deadline as a fraction of the main task deadline if needed
+       
         soloTaskDeadline = moment(mainTaskDeadline).subtract(1, 'days').format('YYYY-MM-DD');
       }
 
       if (mainTaskDuration) {
-        // Set solo task duration as a fraction of main task duration if needed
-        soloTaskDuration = Math.floor(mainTaskDuration / 2); // For example, half the duration
+        
+        soloTaskDuration = Math.floor(mainTaskDuration / 2); 
       }
 
       const newSoloTask = {
@@ -109,16 +121,15 @@ const solo = () => {
         duration: soloTaskDuration,
       };
 
-      // Store the new solo task in the "solotasklist" collection
+      
       const response = await database.createDocument(
         '670e0a0e002e9b302a34', 
-        //'6711f75c00201eca940c',
-        '6729e342001e7f976939', // Collection ID for solo tasks
-        'unique()', // Generate unique ID for the document
+        '6729e342001e7f976939', 
+        'unique()', 
         newSoloTask
       );
 
-      setSoloTasks([...soloTasks, response]); // Add new task to local state
+      setSoloTasks([...soloTasks, response]); 
       setNewTaskTitle('');
       setIsModalVisible(false);
     } catch (error) {
@@ -126,17 +137,17 @@ const solo = () => {
     }
   };
 
-   // Function to update the status of a solo task to "Finished"
+
    const updateSoloTaskStatus = async (soloTaskId) => {
     try {
       const response = await database.updateDocument(
         '670e0a0e002e9b302a34',
-        '6729e342001e7f976939', // Collection ID for solo tasks
+        '6729e342001e7f976939', 
         soloTaskId,
-        { status: 'Finished' } // Update the status to "Finished"
+        { status: 'Finished' } 
       );
 
-      // Update the local state to reflect the change
+      
       setSoloTasks(soloTasks.map(task => 
         task.$id === soloTaskId ? { ...task, status: 'Finished' } : task
       ));
@@ -167,26 +178,34 @@ const solo = () => {
         <Text className="text-lg font-plight capitalize">{task?.type || taskType} Task</Text>
         <Text className="text-3xl font-psemibold text-secondary-100 mb-2">{task?.title || title}</Text>
         <Text className='text-xs font-pregular'>You have {task?.duration} day(s) to finish your activities within this task.</Text>
-          <View className='flex-row mt-3'>
-              <View className="border rounded-full border-secondary-100 mr-4">
-                <Image 
-                  source={images.taskManagerLogo}
-                  className='w-11 h-10 rounded-full'
-                  resizeMode='contain'
-                />
-              </View>
-            <View className='flex-col justify-center'>
-                <View className='flex-row justify-between items-center'>
-                  <Text className='text-xs font-pregular'>Progress</Text>
-                  <Text className='text-sm font-pregular'>0%</Text>
-                </View>
-                <Progress.Bar 
-                  progress={0.01} 
-                  width={330} 
-                  height={7}
-                  color='#FF9001'
-                />
+          
+          
+        <View className='flex-row mt-1'>
+
+          <View className="border-[2px] rounded-full border-secondary-100 p-1">
+            <Image 
+              source={icons.progress}
+              className='w-10 h-10 rounded-full'
+              resizeMode='contain'
+            />
+          </View>
+          <View className='flex-col justify-center flex-1 px-3'>
+            <View className='flex-row justify-between items-center'>
+              <Text className='text-xs font-pregular'>Progress</Text>
+              <Text className='text-sm font-pregular'>{`${Math.round(progressPercentage)}%`}</Text>
             </View>
+
+            <View className=''>
+              <Progress.Bar 
+                progress={progressPercentage / 100} 
+                className='w-full' 
+                color='#FF9001'
+              />
+            </View>
+          </View>
+
+
+
           </View>
 
           <View className='mt-4 border-b border-b-gray-300'>

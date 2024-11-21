@@ -4,15 +4,15 @@ import CustomButton from './CustomButton'
 import CustomInput from './CustomInput';
 import FileCard from './FileCard';
 import CommentCard from './CommentCard';
-import { uploadFile, addComment, updateAssignedTaskStatus, config, storage, getCurrentUser, getComments } from '../lib/appwrite';
-import { ID, Permission, Role } from 'react-native-appwrite';
+import { uploadFile ,addComment, updateAssignedTaskStatus, config, storage, getCurrentUser, getComments, submitFile, databases } from '../lib/appwrite';
+import { ID, Permission, Query, Role } from 'react-native-appwrite';
 import * as DocumentPicker from 'expo-document-picker';
 import EmptySubmitComponent from './EmptySubmitComponent';
 import { icons } from '../constants';
 
 
 
-const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, isSubmit , memberId, username, status  }) => {
+const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, isSubmit , memberId, username, status, isClosed  }) => {
     const [isMember, setIsMember] = useState(true);
     const [inputComment, setInputComment] = useState(false);
     const [showInputComment, setShowInputComment] = useState(true);
@@ -25,7 +25,24 @@ const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, isS
     // console.log("TaskId:", taskId)
     // console.log('Current User: ', currentUser)
 
-    
+    const getUploadedFileMetadata = async (assignedTaskId) => {
+        try {
+          const response = await databases.listDocuments(
+            config.databaseId,
+            config.fileCollectionId, // Replace with your collection ID
+            [Query.equal('assignedTaskId', assignedTaskId)] // Query by assignedTaskId
+          );
+      
+          if (response.documents.length > 0) {
+            return response.documents[0]; // Return the first document (assuming one file per task)
+          } else {
+            return null; // No file metadata found
+          }
+        } catch (error) {
+          console.error('Error fetching file metadata:', error);
+          throw error;
+        }
+      };
 
     const fetchComments = async () => {
         try {
@@ -41,62 +58,104 @@ const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, isS
         fetchComments(); // Trigger fetch when taskId or assignedTaskId changes
     }, [assignedTaskId]);
     
-    
-
-    const handleSelectFile = async () => {
+    const fetchUploadedFile = async () => {
         try {
-            const result = await DocumentPicker.getDocumentAsync({});
-            if (result.type === 'cancel') {
-                console.log("Document picking was canceled");
-                return;
-            }
-            const file = {
-                name: result.name,
-                type: result.mimeType || 'application/octet-stream',
-                size: result.size,
-                uri: result.uri,
+          const metadata = await getUploadedFileMetadata(assignedTaskId);
+          if (metadata) {
+            const uploadedFile = {
+              name: metadata.fileName,
+              type: metadata.fileType,
+              size: metadata.fileSize,
+              uri: metadata.fileUri,
             };
-            setFile(file);
-            console.log("File selected:", file);
-        } catch (err) {
-            console.error("Error selecting file:", err);
-            Alert.alert("Error", "Failed to select a file");
+            setFile(uploadedFile);
+          } else {
+            console.log('No uploaded file found.');
+          }
+        } catch (error) {
+          console.error('Error fetching uploaded file:', error);
         }
+      };
+      
+    
+      useEffect(() => {
+        fetchUploadedFile();
+      }, [assignedTaskId]);
+
+   
+    const handleSelectFile = async () => {
+            try {
+              const result = await DocumentPicker.getDocumentAsync({});
+              console.log("Raw result from DocumentPicker:", result);
+          
+              if (result.canceled) return; // Check if the operation was canceled
+          
+              const fileData = result.assets && result.assets[0]; // Extract the first file from the assets array
+              if (!fileData) {
+                console.error("No file data found!");
+                return;
+              }
+          
+              const selectedFile = {
+                name: fileData.name || 'Unknown', // Use fallback if undefined
+                type: fileData.mimeType || 'application/octet-stream', // Default type
+                size: fileData.size || 0, // Default size
+                uri: fileData.uri || '', // Default to empty if undefined
+              };
+          
+              if (selectedFile.uri) {
+                setFile(selectedFile); // Set the file object
+                console.log("File selected:", selectedFile);
+                console.log(selectedFile.uri); // Log the correct file URI
+              } else {
+                console.error("File URI is missing!");
+              }
+            } catch (error) {
+              console.error('Error selecting file:', error);
+              Alert.alert('Error', 'Failed to select a file');
+            }
     };
-
-
-
+          
     const handleUploadFile = async () => {
         if (!file) {
-            Alert.alert("Error", "No file selected. Please select a file to upload.");
-            return;
+          Alert.alert('Error', 'No file selected. Please select a file to upload.');
+          return;
         }
-
-        if (!memberId) {
-            Alert.alert("Error", "User ID is missing. Cannot set upload permissions.");
-            return;
-        }
-
+    
         try {
-            console.log("Uploading file:", file);
 
-            // Call Appwrite storage API to upload file
-            const response = await storage.createFile(
-                config.storageId,
+              const response = await storage.createFile(
+                  config.storageId,
+                  ID.unique(),
+                  file,
+              );
+
+              const fileUri = `${config.endpoint}/storage/files/${response.$id}/view?project=${config.projectId}`;
+               // Save file metadata to backend
+               await databases.createDocument(
+                config.databaseId,
+                config.fileCollectionId, // Replace with your collection ID
                 ID.unique(),
-                file,
-            );
+                {
+                  assignedTaskId,
+                  fileName: file.name,
+                  fileType: file.type,
+                  fileSize: file.size,
+                  fileUri,
+                }
+              );
+              updateAssignedTaskStatus(assignedTaskId, 'Verifying')
+              console.log("File uploaded successfully:", response);
+              setFile(file); // Reset file state after successful upload
+              Alert.alert("Success", "File uploaded successfully.");
 
-            console.log("File uploaded successfully:", response);
-            setFile(null); // Reset file state after successful upload
-            Alert.alert("Success", "File uploaded successfully.");
         } catch (error) {
-            console.error("Error uploading file:", error);
-            Alert.alert("Error", "Failed to upload file. Please try again.");
+          console.error('Error uploading file:', error);
+          Alert.alert('Error', 'Failed to upload file. Please try again.');
         }
     };
-      
-      const canAddComment = isCreator || isMember;
+    
+    const canAddComment = isCreator || isMember;
 
     const handleAddComment = async () => {
         if (!comment || !canAddComment) return;
@@ -160,7 +219,13 @@ const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, isS
         <View className='py-1'>
                 <ScrollView>
                 {file ? (
-                    <FileCard fileName={file.name} fileUri={file.uri} onDelete={() => setFile(null)} />
+                    <FileCard 
+                        fileName={file.name} 
+                        fileUri={file.uri} 
+                        onDelete={() => setFile(null)} 
+                        onDownload={() => {}}
+                        isCreator={isCreator}
+                        />
                 ) : (
                     <View className='items-center justify-center h-[12vh]'>
                         <EmptySubmitComponent 
@@ -264,7 +329,7 @@ const SubmitForm = ({ assignedTaskId, isCreator, taskId, refreshTaskDetails, isS
                 title="Accept"
                 textStyles="text-base text-white font-psemibold"
                 containerStyles={`min-h-[40px] rounded-md border border-gray-400/70 mb-2 ${status === 'Rejected' || status === 'Accepted' ? 'opacity-60' : ''}`}
-                handlePress={() => updateAssignedTaskStatus(assignedTaskId, 'Accepted')}
+                handlePress={() => { updateAssignedTaskStatus(assignedTaskId, 'Accepted'); isClosed }}
                 icon={() => {}}
                 iconStyle=""
                 isLoading={status === 'Rejected' || status === 'Accepted'}

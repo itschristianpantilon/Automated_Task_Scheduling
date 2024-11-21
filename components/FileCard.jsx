@@ -1,9 +1,10 @@
-import { View, Text, Image } from 'react-native'
+import { View, Text, Image, Alert } from 'react-native'
 import React from 'react'
 import { TouchableOpacity } from 'react-native'
-import { icons } from '../constants'
+import { icons } from '../constants';
+import * as FileSystem from 'expo-file-system';
 
-const FileCard = ({ fileName, fileUri, onDelete }) => {
+const FileCard = ({ fileName, fileUri, onDelete, onDownload, isCreator }) => {
 
   //const isImage = fileUri && fileUri.match(/\.(jpeg|jpg|gif|png)$/);
 
@@ -54,8 +55,33 @@ const FileCard = ({ fileName, fileUri, onDelete }) => {
     );
   };
 
+  const handleDownload = async () => {
+    try {
+      if (!fileUri) {
+        Alert.alert('Error', 'No file URL found.');
+        return;
+      }
+  
+      // Define the destination file URI where the file will be saved locally
+      const fileUriPath = `${FileSystem.documentDirectory}${fileName}`;
+  
+      // Start downloading the file using the Appwrite file URL (make sure it's accessible)
+      const downloadResumable = FileSystem.createDownloadResumable(
+        fileUri, // Appwrite's file view URL
+        fileUriPath // Local path where the file should be saved
+      );
+  
+      const { uri } = await downloadResumable.downloadAsync();
+      Alert.alert('Download Successful', `File saved to: ${uri}`);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      Alert.alert('Error', 'Failed to download the file. Please try again.');
+    }
+  };
+  
+
   return (
-    <View className="flex-row items-center justify-between py-1 px-3 border border-gray-400/90 rounded-sm">
+    <View className="flex-row items-center justify-between py-1 px-3 border border-gray-400/50 rounded-md">
         <View className='flex-row items-center justify-center'>
             <View className='w-9 h-9 mr-2'>
                 {/* {isImage ? (
@@ -73,13 +99,25 @@ const FileCard = ({ fileName, fileUri, onDelete }) => {
             </View>
         </View>
 
-      <TouchableOpacity onPress={onDelete}>
+      {isCreator ? (
+        <TouchableOpacity onPress={handleDownload}>
         <Image 
-            source={icons.close}
+            source={icons.download}
             className='w-5 h-5'
             resizeMode='contain'
         />
       </TouchableOpacity>
+      ) : (
+        <TouchableOpacity onPress={onDelete}>
+          <Image 
+              source={icons.close}
+              className='w-5 h-5'
+              resizeMode='contain'
+          />
+        </TouchableOpacity>
+      )}
+
+      
     </View>
   )
 }

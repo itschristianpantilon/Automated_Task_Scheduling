@@ -7,7 +7,7 @@ import { icons } from '../constants';
 const OverviewCard = ({ title, username, userAvatar, status, onPress, onHide }) => {
     const { user } = useGlobalContext();
   return (
-    <View className={`border border-gray-400/70 flex-row items-center justify-between p-4 rounded-md mb-3 w-full ${status === 'Accepted' ? 'opacity-80 border-green-500' : ''} ${status === 'Verifying' ? 'border-secondary-200' : ''} ${status === 'Rejected' ? 'border-red-600' : ''}`}>
+    <View className={`border border-gray-400/70 flex-row items-center justify-between p-4 rounded-md mb-2 w-full ${status === 'Accepted' ? 'opacity-80 border-green-500' : ''} ${status === 'Verifying' ? 'border-secondary-200' : ''} ${status === 'Rejected' ? 'border-red-600' : ''}`}>
         <View className='flex-1'>
             <Text className='text-base font-psemibold mb-1'>{title}</Text>
             <View className='flex-row items-center'>

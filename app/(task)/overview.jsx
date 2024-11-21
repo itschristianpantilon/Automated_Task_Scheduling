@@ -1,4 +1,4 @@
-import { View, Text, Image, Alert, ToastAndroid, Platform, FlatList, ScrollView, Modal, RefreshControl } from 'react-native'
+import { View, Text, Image, Alert, ToastAndroid, Platform, FlatList, ScrollView, Modal, RefreshControl, TextInput } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { assignTaskToMember, config, createTask, databases } from '../../lib/appwrite'
@@ -19,6 +19,7 @@ import EmptyContent from '../../components/EmptyContent'
 import SubmitForm from '../../components/SubmitForm'
 import PopUpRemove from '../../components/PopUpRemove'
 import AssignMemberContainer from '../../components/AssignMemberContainer';
+
 
 
 const overview = () => {
@@ -43,7 +44,24 @@ const overview = () => {
   const [groupAssignedTaskData, setGroupAssignedTaskData] = useState(null);
 
 
+  const [progressPercentage, setProgressPercentage] = useState(0);
 
+  
+  const calculateProgress = () => {
+    if (assignedTasks.length === 0) {
+      setProgressPercentage(0);
+      return;
+    }
+
+    const acceptedTasks = assignedTasks.filter((task) => task.status === 'Accepted');
+    const percentage = (acceptedTasks.length / assignedTasks.length) * 100;
+    setProgressPercentage(percentage);
+  };
+
+  
+  useEffect(() => {
+    calculateProgress();
+  }, [assignedTasks]);
 
 //Fetch Task
 const fetchTask = async () => {
@@ -222,18 +240,18 @@ const onRefresh = async () => {
   setRefreshing(false);
 };
 
-// Function to fetch groupAssignedCollection data
+
 const fetchGroupAssignedData = async () => {
   if (!taskId) return;
 
   try {
     const response = await database.listDocuments(
       config.databaseId,
-      config.groupAssignedTasksCollectionId, // Ensure this is the correct collection ID for groupAssignedCollection
+      config.groupAssignedTasksCollectionId, 
       [Query.equal("taskId", taskId)]
     );
     
-    // Assuming you want to store this data in state, add it here
+
     setGroupAssignedTaskData(response.documents);
     
   } catch (error) {
@@ -263,7 +281,7 @@ useEffect(() => {
                   />
                 </TouchableOpacity>
       </View>
-      <View className="p-4 flex-col">
+      <View className="px-4 py-2 flex-col">
         <Text className="text-base font-plight capitalize">{task?.type || taskType} Task</Text>
         <Text className="text-2xl font-psemibold text-secondary-100 mb-2">{task?.title || title}</Text>
         <Text className='text-xs font-pregular mb-1'>Group Code:</Text>
@@ -279,37 +297,45 @@ useEffect(() => {
             </TouchableOpacity>
           </View>
           <Text className='text-xs font-pregular py-2'>You have {task?.duration} day(s) to finish your activities within this task.</Text>
+
+          
           <View className='flex-row mt-1'>
-              <View className="border rounded-full border-secondary-100 mr-4">
+
+              <View className="border-[2px] rounded-full border-secondary-100 p-1">
                 <Image 
-                  source={images.taskManagerLogo}
-                  className='w-11 h-10 rounded-full'
+                  source={icons.progress}
+                  className='w-10 h-10 rounded-full'
                   resizeMode='contain'
                 />
               </View>
-            <View className='flex-col justify-center'>
+            <View className='flex-col justify-center flex-1 px-3'>
                 <View className='flex-row justify-between items-center'>
                   <Text className='text-xs font-pregular'>Progress</Text>
-                  <Text className='text-sm font-pregular'>0%</Text>
+                  <Text className='text-sm font-pregular'>{`${Math.round(progressPercentage)}%`}</Text>
                 </View>
-                <Progress.Bar 
-                  progress={0.01} 
-                  width={300} 
-                  height={7}
-                  color='#FF9001'
-                />
+
+                <View className=''>
+                  <Progress.Bar 
+                    progress={progressPercentage / 100} 
+                    className='w-full' 
+                    color='#FF9001'
+                  />
+                </View>
             </View>
+
+           
+
           </View>
 
-          <View className='mt-3 border-b border-b-gray-300'>
+          <View className='mt-2 border-b border-b-gray-300'>
             <Text className='text-lg font-psemibold'>Overview</Text>
           </View>
       </View>
 
-      <View className={`p-2 items-center justify-center`}>
+      <View className={`px-2 items-center justify-center h-[45vh]`}>
           {assignedTasks.length > 0 ? (
             <ScrollView 
-              className='h-[50vh] overflow-scroll'
+              className='overflow-scroll'
               refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
               }
@@ -372,6 +398,7 @@ useEffect(() => {
                   currentUser={user?.$id}
                   username={selectedMember.username}
                   status={selectedMember.status}
+                  isClosed={isSubmitClose}
                 />
               </View>
 
@@ -395,7 +422,7 @@ useEffect(() => {
               <View className="w-[95%] p-5 bg-white rounded-lg min-h-[85vh]">
                 <View className='flex-row items-center justify-between pb-2 border-b border-b-gray-300'>
                   <Text className="text-lg font-psemibold">Assign Task</Text>
-                  {/* Your form or additional content goes here */}
+                
                   <TouchableOpacity onPress={closeModal} className="">
                     <Image 
                       source={icons.close}
@@ -497,7 +524,7 @@ useEffect(() => {
       )}
 
       {isCreator && (
-        <View className={`absolute bottom-0 w-full p-4 bg-white`}>
+        <View className={`absolute bottom-0 w-full p-4`}>
 
             <CustomButton 
               title="Assign Task"
@@ -515,6 +542,7 @@ useEffect(() => {
             onPress={openModal}
             setOnpress={setOpenModal}
             onTouchClose={onTouchClose}
+            leave={() => {}}
           />
       )}
       

@@ -11,14 +11,14 @@ export default function App() {
 
     const { isLoading, isLoggedIn } = useGlobalContext();
 
-    if (!isLoading && isLoggedIn) return <Redirect href='/profile' />
+    if (!isLoading && isLoggedIn) return <Redirect href='/Home' />
 
     return (
         <SafeAreaView className="bg-white h-full">
             <ScrollView contentContainerStyle={{ height: '100%' }}>
                 <View className="w-full justify-center items-center min-h-[100vh] px-4">
 
-                    <Text className='text-2xl font-bold text-center'>Automated Task Scheduling</Text>
+                    <Text className='text-2xl font-bold text-center'>Automated Task Managing</Text>
 
                     <Image
                         source={images.taskLogo}

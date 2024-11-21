@@ -4,11 +4,11 @@
     "slug": "automated-task-managing",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "",
+    "icon": "./assets/images/taskManagerLogo_icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "",
+      "image": "./assets/images/taskManagerLogo_icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -18,25 +18,19 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "",
+        "foregroundImage": "./assets/images/taskManagerLogo_icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.native.application",
+      "package": "com.automated.task",
       "permissions": ["INTERNET"]
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": ""
+      "favicon": "./assets/images/taskManagerLogo_icon.png"
     },
     "plugins": [
-      "expo-router",
-      [
-        "expo-document-picker",
-        {
-          "iCloudContainerEnvironment": "Production"
-        }
-      ]
+      "expo-router"
     ],
     "experiments": {
       "typedRoutes": true

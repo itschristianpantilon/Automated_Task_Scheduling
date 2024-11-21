@@ -15,15 +15,14 @@ import { format, differenceInDays } from 'date-fns';
 
 
 const create = () => {
-    const {user, setUser, setIsLoggedIn} = useGlobalContext();
     const navigation = useNavigation();
     const [title, setTitle] = useState('');
     const [groupCode, setGroupCode] = useState(null);
     const [taskType, setTaskType] = useState('solo');
     const { setTaskId } = useTask();
     const [tasks, setTasks] = useState([]);
-    const [deadline, setDeadline] = useState(null);  // New state for deadline
-    const [duration, setDuration] = useState(null);  // New state for duration in days
+    const [deadline, setDeadline] = useState(null);  
+    const [duration, setDuration] = useState(null);  
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [status, setStatus] = useState('');
     
@@ -34,20 +33,20 @@ const create = () => {
           }
 
         try {
-          const newTask = await createTask(title, taskType, deadline, duration, status); // Call the createTask function
+          const newTask = await createTask(title, taskType, deadline, duration, status); 
           setStatus(newTask.status);
           setTaskId(newTask.$id);
           
           if (taskType === 'group') {
-            setGroupCode(newTask.groupId); // Save the generated group code
+            setGroupCode(newTask.groupId); 
             navigation.push('(task)', {
                 title,
                 taskType,
                 groupId: newTask.groupId });
           }
           else if (taskType === 'solo') {
-            setGroupCode(null); // No groupId for solo tasks, but you can reset or handle accordingly
-            navigation.push('solo', { groupId: null, title }); // Navigate to overview without a groupId
+            setGroupCode(null); 
+            navigation.push('solo', { groupId: null, title }); 
           }
         } catch (error) {
           console.error('Failed to create task in create page:', error);
